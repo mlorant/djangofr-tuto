@@ -18,7 +18,7 @@ Ce cours porte sur la **version 1.7 de Django**, et n'assure nullement que toute
 
 Licence
 -------
-Ce cours est distribué sous licence Crative Commons BY NC SA : 
+Ce cours est distribué sous licence _Creative Commons BY NC SA_ : 
 - Attribution
 - Pas d’Utilisation Commerciale 
 - Partage dans les Mêmes Conditions 
