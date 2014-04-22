@@ -98,7 +98,20 @@ Nous avons ensuite la variable `ALLOWED_HOSTS` que nous allons laisser de côté
 Un peu plus bas, la configuration de la base de données se fait dans le dictionnaire `DATABASES`, **déjà rempli pour gérer une base de données SQLite** (notez l'utilisation de `BASE_DIR` par ailleurs).   
 Nous conseillons pour le développement local de garder cette configuration. L'avantage de SQLite comme gestionnaire de base de données pour le développement est simple : il ne s'agit que d'un simple fichier. Il n'y a donc **pas besoin d'installer un service à part** ; Python et Django se chargent de tout. Si vous n'avez aucune idée de ce qu'est réellement une base de données SQLite, n'ayez aucune crainte, le prochain chapitre vous expliquera en détail en quoi elles consistent et comment elles fonctionnent.
 
-Just après la base de données, nous avons quelques réglagles pour définir la langue et le fuseau horaire de votre projet : 
+Si vous souhaitez utilisez une base de données MySQL par exemple, plus de champs sont nécéssaires, voici une configuration d'exemple : 
+
+	DATABASES = {
+	    'default': {
+	        'ENGINE': 'django.db.backends.mysql',  # Backends disponibles : 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+	        'NAME': 'crepes_bretonnes',  # Nom de la base de données
+	        'USER': '<user>',            # Utilisateur
+	        'PASSWORD': '<pswd>',        # Mot de passe si nécessaire
+	        'HOST': '127.0.0.1',         # Utile si votre base de données est sur une autre machine
+	        'PORT': '',                  # ... et si elle utilise un autre port que celui par défaut
+	    }
+	}
+
+Juste après la base de données, nous avons quelques variables pour définir la langue et le fuseau horaire de votre projet : 
 
     # Langage utilisé au sein de Django, pour afficher les messages 
     # d'information et d'erreurs notamment
@@ -109,7 +122,6 @@ Just après la base de données, nous avons quelques réglagles pour définir la
 
 Il y a ensuite les variables `USE_I18N`, `USE_L10N` et `USE_TZ` qui sont toutes à `True`. Elles permettent entre autres d'activer l'internationalisation et ainsi avoir l'interface en français, la répresentation des jours au format `dd/mm/YYYY` et d'autres détails. 
     
-
 Voilà ! Les variables les plus importantes ont été expliquées. Pour que ce ne soit pas indigeste, nous n'avons pas tout traité, **il en reste en effet beaucoup d'autres**. De nombreuses variables ne sont pas présentes dans ce fichier par défaut et ont une valeur déjà définie par le framework.   
 Nous reviendrons sur certains paramètres plus tard. En attendant, si une variable vous intrigue, n'hésitez pas à lire le commentaire (bien qu'en anglais) à côté de la déclaration et à vous référer à [la documentation en ligne](https://docs.djangoproject.com/en/dev/ref/settings/).
 
@@ -141,10 +153,39 @@ Comme avec `startproject`, `startapp` crée un dossier avec plusieurs fichiers e
             manage.py
             
 
+Si vous avez suivi, certains noms de fichiers sont relativement évidents. Nous allons les voir un à un dans les prochains chapitres : 
+
+- `admin.py` va permettre de définir ce que vous souhaitez afficher et pouvoir modifier dans l'administration de l'application. 
+- `models.py` contiendra vos modèles ;
+- `tests.py` permet la création de tests unitaires (un chapitre y est consacré dans la quatrième partie de ce cours) ;
+- `views.py` contiendra toutes les vues de votre application.
+
+Le dossier `migrations` nous servira plus tard, quand nous parlerons des modèles. Il permet de retracer l'évolution de vos modèles dans le temps et d'appliquer les modifications à votre base de données. Nous verrons ça plus en détails également, laissons-le de côté pour le moment.
+
+<div class="info">À partir de maintenant, nous ne parlerons plus des fichiers __init__.py, qui ne sont là que pour indiquer que notre dossier est un module Python. C'est une spécificité de Python qui ne concerne pas directement Django.</div>
+
+Dernière petite chose, il faut ajouter cette application au projet. Pour que Django considère le sous-dossier `blog` comme une application, il faut donc l'ajouter dans la configuration. 
+
+Retournez dans le fichier `settings.py`, et cherchez la variable `INSTALLED_APPS`, que l'on a ignoré plus tôt. Tout en conservant les autres applications installées, ajoutez une chaîne de caractères avec le nom de votre application.   
+Votre variable devrait ressembler à quelque chose comme ceci :
+
+
+	INSTALLED_APPS = (
+	    'django.contrib.admin',
+	    'django.contrib.auth',
+	    'django.contrib.contenttypes',
+	    'django.contrib.sessions',
+	    'django.contrib.messages',
+	    'django.contrib.staticfiles',
+		'blog',
+	)
+
+Nous sommes désormais prêts pour attaquer le développement de notre application de blog !
+
 En résumé
 ---------
 
 - L'administration de projet s'effectue via la script `manage.py`. Tout particulièrement, la création d'un projet se fait via la commande `django-admin.py startproject mon_projet`.
 - À la création du projet, Django déploie un ensemble de fichiers, facilitant à la fois la structuration du projet et sa configuration.
 - Pour tester notre projet, il est possible de lancer un serveur de test, via la commande `python manage.py runserver`, dans le dossier de notre projet. Ce serveur de test ne doit pas être utilisé en production.
-- Il est nécessaire de modifier le `settings.py`, afin de configurer le projet selon nos besoins. Ce fichier ne doit pas être partagé avec les autres membres ou la production, puisqu'il contient des données dépendant de votre installation, comme la connexion à la base de données.
+- Il est nécessaire de modifier le `settings.py`, afin de configurer le projet selon nos besoins. Ce fichier ne doit pas être partagé avec les autres membres ou la production, puisqu'il peut contenir des données dépendant de votre installation, comme la connexion à la base de données et la `SECRET_KEY`.
