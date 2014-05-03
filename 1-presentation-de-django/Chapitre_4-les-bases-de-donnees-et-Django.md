@@ -15,8 +15,8 @@ Il existe plusieurs méthodes de classement pour trier nos films, mais la plus s
 	| Pulp Fiction       | Quentin Tarantino  | 1994  | 19            |
 	| Django Unchained   | Quentin Tarantino  | 2012  | 20            |
 	| Holy Grail         | Monty Python       | 1975  | 19            |
-    | Fight Club         | David Fincher      | 1999  | 20            |
-    | Life of Brian      | Monty Python       | 1979  | 17            |
+	| Fight Club         | David Fincher      | 1999  | 20            |
+	| Life of Brian      | Monty Python       | 1979  | 17            |
 
 
 Le classement par tableau est très pratique et simple à comprendre. Les bases de données s'appuient sur cette méthode de tri pour enregistrer et classer les informations que vous spécifierez.
@@ -86,7 +86,7 @@ De la même façon, il est possible d'obtenir toutes les entrées de la table. A
 
 ![Fonctionnement de l'ORM de Django](images/orm-schema.png "Fonctionnement de l'ORM de Django")
 
-Pour conclure, l'ORM est un système très flexible de Django qui s'insère parfaitement bien dans l'architecture MVT que nous avons décrite précédemment. L'avantage majeur est bien évidemment une meilleure compréhension du code pour les non habitués au SQL. Cependant, cela nous donne également la possibilité de migrer d'un système de base de données à un autre sans toucher à notre code.
+Pour conclure, l'ORM est un système très flexible, utilisé dans la plupart des frameworks web aujourd'hui. Django l'insère parfaitement bien dans l'architecture MVT que nous avons décrite précédemment. L'avantage majeur est bien évidemment une meilleure compréhension du code pour les non habitués au SQL. Cependant, cela nous donne également la possibilité de migrer d'un système de base de données à un autre sans toucher à notre code.
 
 Le principe des clés étrangères 
 -------------------------------
