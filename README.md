@@ -27,5 +27,5 @@ Plus de détails sur cette licence sur le [site officiel de Creative Commons](ht
 
 Auteurs
 -------
-Ce cours a été écrit par [Mathieu Xhonneux](http://zashas.net/) et [Maxime Lorant](http://www.maxime-lorant.fr), et est notamment édité par [OpenClassrooms](http://fr.openclassrooms.com) en e-book et livre. 
+Ce cours a été écrit par Mathieu Xhonneux et [Maxime Lorant](http://www.maxime-lorant.fr), et est notamment édité par [OpenClassrooms](http://fr.openclassrooms.com) en e-book et livre. 
 En cas d'erreur ou si vous avez des suggestions, n'hésitez pas à nous contacter.
