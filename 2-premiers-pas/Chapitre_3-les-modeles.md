@@ -46,7 +46,7 @@ Pour que Django crée la table associée au modèle, il suffit de lancer la comm
 
 Par la suite, si vous ajoutez ou modifiez un modèle, vous devrez tout d'abord utiliser la commande `python manage.py makemigrations` qui va déterminer quelles modifications vous avez apportées à vos modèles, et ensuite réutiliser `migrate` qui va mettre à jour la base de données selon les modifications déterminées. 
 
-![Aperçu des tables créées dans un outil de gestion de base de données](images/vue_modeles.png "Aperçu des tables créées dans un outil de gestion de base de données")
+![Aperçu des tables créées dans un outil de gestion de base de données](images/vue_bdd.png "Aperçu des tables créées dans un outil de gestion de base de données")
 
 La table associée au modèle `Article` étant créée, nous pouvons commencer à jouer avec !
 
@@ -199,7 +199,7 @@ Il est souvent pratique de lier deux modèles entre eux, pour relier un article 
 
 Reprenons notre exemple des catégories et des articles. Lorsque vous concevrez votre base de données, vous allez souvent faire des liens entre les classes (qui représentent nos tables SQL dans notre site), comme à la figure suivante.
 
-![Ici, un article peut être lié à une et une seule catégorie, et une catégorie peut être attribuée à une infinité d'articles](images/vue_modeles.png "Ici, un article peut être lié à une et une seule catégorie, et une catégorie peut être attribuée à une infinité d'articles")
+![Ici, un article peut être lié à une et une seule catégorie, et une catégorie peut être attribuée à une infinité d'articles](images/schema-uml.png "Ici, un article peut être lié à une et une seule catégorie, et une catégorie peut être attribuée à une infinité d'articles")
 
 Pour traduire cette relation, nous allons d'abord devoir créer un autre modèle représentant les catégories. Ce dernier est relativement simple :
 
