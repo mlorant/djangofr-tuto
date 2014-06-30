@@ -199,7 +199,7 @@ Il est souvent pratique de lier deux modèles entre eux, pour relier un article 
 
 Reprenons notre exemple des catégories et des articles. Lorsque vous concevrez votre base de données, vous allez souvent faire des liens entre les classes (qui représentent nos tables SQL dans notre site), comme à la figure suivante.
 
-![Ici, un article peut être lié à une et une seule catégorie, et une catégorie peut être attribuée à une infinité d'articles](images/vues_modeles.png "Ici, un article peut être lié à une et une seule catégorie, et une catégorie peut être attribuée à une infinité d'articles")
+![Ici, un article peut être lié à une et une seule catégorie, et une catégorie peut être attribuée à une infinité d'articles](images/vue_modeles.png "Ici, un article peut être lié à une et une seule catégorie, et une catégorie peut être attribuée à une infinité d'articles")
 
 Pour traduire cette relation, nous allons d'abord devoir créer un autre modèle représentant les catégories. Ce dernier est relativement simple :
 
