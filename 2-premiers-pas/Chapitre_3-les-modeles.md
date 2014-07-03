@@ -19,12 +19,12 @@ Tout modèle Django se doit d'hériter de la classe mère `Model` incluse dans `
         contenu = models.TextField(null=True)
         date = models.DateTimeField(auto_now_add=True, auto_now=False,  verbose_name="Date de parution")
         def __unicode__(self):
-         """ 
-        Cette méthode que nous définirons dans tous les modèles
-        nous permettra de reconnaître facilement les différents objets que nous
-        traiterons plus tard et dans l'administration
-        """
-    return "%s" % self.titre
+            """ 
+            Cette méthode que nous définirons dans tous les modèles
+            nous permettra de reconnaître facilement les différents objets que nous
+            traiterons plus tard et dans l'administration
+            """
+            return "%s" % self.titre
 
 Pour que Django puisse créer une table dans la base de données, il faut lui préciser le type des champs qu'il doit créer. Pour ce faire, le framework propose une liste de champs qu'il sera ensuite capable de retranscrire en langage SQL. Ces derniers sont également situés dans le module `models`.
 
@@ -262,6 +262,7 @@ Un autre bref exemple :
         nom = models.CharField(max_length=25)
         def __unicode__(self):
             return self.nom
+
     class Voiture(models.Model):
         nom = models.CharField(max_length=25)
         moteur = models.OneToOneField(Moteur)
@@ -292,12 +293,14 @@ Il nous faudra trois modèles :
         nom = models.CharField(max_length=30)
         def __unicode__(self):
             return self.nom
+
     class Vendeur(models.Model):
         nom = models.CharField(max_length=30)
         produits = models.ManyToManyField(Produit, through='Offre')
         
         def __unicode__(self):
             return self.nom
+
     class Offre(models.Model):
         prix = models.IntegerField()
         produit = models.ForeignKey(Produit)
@@ -391,6 +394,7 @@ Chaque table contient les attributs définis dans le modèle, mais également un
     from django.http import Http404
     from django.shortcuts import render
     from blog.models import Article
+
     def accueil(request):
         """ Afficher tous les articles de notre blog """
         articles = Article.objects.all() # Nous sélectionnons tous nos      articles
@@ -399,10 +403,14 @@ Chaque table contient les attributs définis dans le modèle, mais également un
         """ Afficher un article complet """
         pass # Le code de cette fonction est donné un peu plus loin.
 
+-----------
+
     urlpatterns = patterns('blog.views',
         url(r'^$', 'accueil'),
         url(r'^article/(?P<id>\d+)$', 'lire'),
     )
+
+-----------
 
     <h1>Bienvenue sur le blog des crêpes bretonnes !</h1>
     {% for article in derniers_articles %}
@@ -431,7 +439,7 @@ Une vue possible est la suivante :
 
 C'est assez verbeux, or les développeurs Django sont très friands de raccourcis. Un raccourci particulièrement utile ici est `get_object_or_404`, permettant de récupérer un objet selon certaines conditions, ou renvoyer la page d'erreur 404 si aucun objet n'a été trouvé. Le même raccourci existe pour obtenir une liste d'objets : `get_list_or_404`.
 
-! Il faut ajouter l'import get_object_or_404, attention !
+Il faut ajouter l'import `get_object_or_404`, attention !
 
     from django.shortcuts import render, get_object_or_404
     def lire(request, id):
@@ -452,9 +460,7 @@ Ce qui nous donne la figure suivante :
 
 Comme vous pouvez le voir, nos URL contiennent pour le moment un ID permettant de déterminer quel article il faut afficher. C'est relativement pratique, mais cela a l'inconvénient de ne pas être très parlant pour l'utilisateur. Pour remédier à cela, nous voyons de plus en plus fleurir sur le web des adresses contenant le titre de l'article réécrit. Par exemple, nous pourrions avoir, à la place de /blog/article/2, /blog/article/les-crepes-a-la-biere, ce qui nous permet de savoir de quoi parle le lien, sans même avoir cliqué dessus. Cette chaîne est couramment appelée un slug. Et pour définir ce terme barbare, rien de mieux que Wikipédia :
 
-Citation : Wikipédia - Slug (journalisme)
-
-    Un slug est en journalisme un label court donné à un article            publié, ou en cours d'écriture. Il permet d'identifier l'article tout au long de sa production et dans les archives. Il peut contenir des informations sur l'état de l'article, afin de les catégoriser.
+    Un slug est en journalisme un label court donné à un article publié, ou en cours d'écriture. Il permet d'identifier l'article tout au long de sa production et dans les archives. Il peut contenir des informations sur l'état de l'article, afin de les catégoriser.
 
 Nous allons intégrer la même chose à notre système de blog. Pour cela, il existe un type de champ un peu spécial dans les modèles : le `SlugField`. Il permet de stocker une chaîne de caractères, d'une certaine taille maximale. Ainsi, notre modèle devient le suivant :
 
@@ -465,7 +471,7 @@ Nous allons intégrer la même chose à notre système de blog. Pour cela, il ex
         contenu = models.TextField(null=True)
         date = models.DateTimeField(auto_now_add=True, auto_now=False, verbose_name="Date de parution")
         def __unicode__(self):
-    return self.titre
+            return self.titre
     
 N'oubliez pas de mettre à jour la structure de votre table, comme nous l'avons déjà expliqué précédemment, et de créer une nouvelle entrée à partir de `manage.py shell` !
 
