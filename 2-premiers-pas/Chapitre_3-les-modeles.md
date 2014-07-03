@@ -180,7 +180,7 @@ Premièrement, `get`, comme son nom l'indique, permet d'obtenir une et une seule
 	...
 	DoesNotExist: Article matching query does not exist. Lookup parameters were {'titre': "Je n'existe pas"}
 	>>> print Article.objects.get(auteur="Mathieu").titre
-Les crêpes
+    Les crêpes
 	>>> Article.objects.get(titre__contains="L")
 	...
 	MultipleObjectsReturned: get() returned more than one Article -- it returned 2! Lookup parameters were {'titre__contains': 'L'}
@@ -199,7 +199,7 @@ Il est souvent pratique de lier deux modèles entre eux, pour relier un article 
 
 Reprenons notre exemple des catégories et des articles. Lorsque vous concevrez votre base de données, vous allez souvent faire des liens entre les classes (qui représentent nos tables SQL dans notre site), comme à la figure suivante.
 
-![Ici, un article peut être lié à une et une seule catégorie, et une catégorie peut être attribuée à une infinité d'articles](images/schema-uml.png "Ici, un article peut être lié à une et une seule catégorie, et une catégorie peut être attribuée à une infinité d'articles")
+![Ici, un article peut être lié à une et une seule catégorie, et une catégorie peut être attribuée à une infinité d'articles](images/schema_uml.png "Ici, un article peut être lié à une et une seule catégorie, et une catégorie peut être attribuée à une infinité d'articles")
 
 Pour traduire cette relation, nous allons d'abord devoir créer un autre modèle représentant les catégories. Ce dernier est relativement simple :
 
@@ -491,10 +491,10 @@ En résumé
 ---------
 
 - Un modèle représente une table dans la base de données et ses attributs correspondent aux champs de la table.
-- Tout modèle Django hérite de la classe mère Model incluse dans django.db.models.
-- Chaque attribut du modèle est typé et décrit le contenu du champ, en fonction de la classe utilisée : CharField, DateTimeField, IntegerField…
-- Les requêtes à la base de données sur le modèle Article peuvent être effectuées via des appels de méthodes sur Article.objects, tels que all(), filter(nom="Un nom") ou encore order_by('date').
-- L'enregistrement et la mise à jour d'articles dans la base de données se fait par la manipulation d'objets de la classe Article, et via l'appel à la méthode save().
-- Deux modèles peuvent être liés ensemble par le principe des clés étrangères. La relation dépend cependant des contraintes de multiplicité qu'il faut respecter : OneToOneField, ManyToManyField.
-- Il est possible d'afficher les attributs d'un objet dans un template de la même façon qu'en Python via des appels du type article.nom. Il est également possible d'itérer une liste d'objets, pour afficher une liste d'articles par exemple.
+- Tout modèle Django hérite de la classe mère `Model` incluse dans `django.db.models`.
+- Chaque attribut du modèle est typé et décrit le contenu du champ, en fonction de la classe utilisée : `CharField`, `DateTimeField`, `IntegerField` …
+- Les requêtes à la base de données sur le modèle Article peuvent être effectuées via des appels de méthodes sur Article.objects, tels que `all()`, `filter(nom="Un nom")` ou encore `order_by('date')`.
+- L'enregistrement et la mise à jour d'articles dans la base de données se fait par la manipulation d'objets de la classe `Article`, et via l'appel à la méthode `save()`.
+- Deux modèles peuvent être liés ensemble par le principe des clés étrangères. La relation dépend cependant des contraintes de multiplicité qu'il faut respecter : `OneToOneField`, `ManyToManyField`.
+- Il est possible d'afficher les attributs d'un objet dans un template de la même façon qu'en Python via des appels du type `article.nom`. Il est également possible d'itérer une liste d'objets, pour afficher une liste d'articles par exemple.
 
