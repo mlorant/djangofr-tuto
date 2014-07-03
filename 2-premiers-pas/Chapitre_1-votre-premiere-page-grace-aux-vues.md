@@ -1,16 +1,16 @@
-Votre première page grâce aux vues 
+Votre première page grâce aux vues
 ==================================
 
 Dans ce chapitre, nous allons créer notre première page web avec Django. Pour ce faire, nous verrons comment créer une vue dans une application et la rendre accessible depuis une URL. Une fois cela fait, nous verrons comment organiser proprement nos URL afin de rendre le code plus propre et structuré. Nous aborderons ensuite deux cas spécifiques des URL, à savoir la gestion de paramètres et de variables dans celles-ci, et les redirections, messages d'erreur, etc.
 
 Cette partie est fondamentale pour aborder la suite et comprendre le fonctionnement du framework en général. Autrement dit, nous ne pouvons que vous conseiller de bien vous accrocher tout du long !
 
-Hello World ! 
+Hello World !
 -------------
 
 Commençons enfin notre blog sur les bonnes crêpes bretonnes. En effet, au chapitre précédent, nous avons créé une application « blog » dans notre projet, il est désormais temps de se mettre au travail !
 
-Pour rappel, comme vu dans la théorie, *chaque vue se doit d'être associée au minimum à une URL*. Avec Django, une vue est représentée par une fonction définie dans le fichier `views.py`. Cette fonction va généralement récupérer des données dans les modèles (ce que nous verrons plus tard) et appeler le bon template pour générer le rendu HTML adéquat. Par exemple, nous pourrions donner la liste des 10 derniers articles de notre blog au moteur de templates, qui se chargera de les insérer dans une page HTML finale, qui sera renvoyée à l'utilisateur.
+Pour rappel, comme vu dans la théorie, *chaque vue se doit d'être associée au minimum à une URL*. Avec Django, une vue est représentée par une fonction définie dans le fichier `views.py`, prenant en paramètre une requête HTTP et renvoyant une réponse HTTP. Cette fonction va généralement récupérer des données dans les modèles (ce que nous verrons plus tard) et appeler le bon template pour générer le rendu HTML adéquat. Par exemple, nous pourrions donner la liste des 10 derniers articles de notre blog au moteur de templates, qui se chargera de les insérer dans une page HTML finale, qui sera renvoyée à l'utilisateur.
 
 Pour débuter, nous allons réaliser quelque chose de relativement simple : une page qui affichera « Bienvenue sur mon blog ! ».
 
@@ -21,7 +21,7 @@ Chaque application possède *son propre* fichier `views.py`, regroupant l'ensemb
 Commençons à travailler dans `blog/views.py`. Par défaut, Django a généré gentiment ce fichier :
 
     from django.shortcuts import render
-    
+
     # Create your views here.
 
 Pour éviter tout problème par la suite, indiquons à l'interpréteur Python que le fichier sera en UTF-8, afin de prendre en charge les accents. En effet, Django gère totalement l'UTF-8 et il serait bien dommage de ne pas l'utiliser. Insérez ceci comme première ligne de code du fichier, avant l'import :
@@ -36,7 +36,7 @@ Désormais, nous pouvons créer une fonction qui remplira le rôle de la vue. Bi
 	#-*- coding: utf-8 -*-
 	from django.http import HttpResponse
 	from django.shortcuts import render
-	
+
 	def home(request):
         # On renvoie une page HTML non valide ici, pour que l'exemple soit concis
 	    text = """<h1>Bienvenue sur mon blog !</h1>
@@ -51,11 +51,11 @@ Ce code se divise en trois parties :
 
 <div class="info">Toutes les fonctions prendront comme premier argument un objet du type `HttpRequest`. Toutes les vues doivent forcément retourner une instance de `HttpResponse`, sans quoi Django générera une erreur.</div>
 
-Par la suite, _ne renvoyez jamais du code HTML directement depuis la vue_ comme nous le faisons ici. Passez toujours par des templates, ce que nous introduirons au chapitre suivant, utilisable avec la méthode `render` que nous avons laissé de côté pour le moment.   
+Par la suite, _ne renvoyez jamais du code HTML directement depuis la vue_ comme nous le faisons ici. Passez toujours par des templates, ce que nous introduirons au chapitre suivant, utilisable avec la méthode `render` que nous avons laissé de côté pour le moment.
 Il s'agit de respecter l'architecture du framework dont nous avons parlé dans la partie précédente afin de bénéficier de ses avantages (la structuration du code notamment). Nous n'avons utilisé cette méthode que dans un _but pédagogique_ et afin de montrer les choses une par une.
 
 
-Routage d'URL : comment j'accède à ma vue ? 
+Routage d'URL : comment j'accède à ma vue ?
 -------------------------------------------
 Nous avons désormais une vue opérationnelle, il n'y a plus qu'à l'appeler depuis une URL. Mais comment ? En effet, nous n'avons pas encore défini vers quelle URL pointait cette fonction. Pour ce faire, il faut modifier le fichier `urls.py` de votre projet (ici `crepes_bretonnes/urls.py`). Par défaut, ce fichier est minimaliste et contient des exemples basiques :
 
@@ -66,7 +66,7 @@ Nous avons désormais une vue opérationnelle, il n'y a plus qu'à l'appeler dep
 	    # Examples:
 	    # url(r'^$', 'crepes_bretonnes.views.home', name='home'),
 	    # url(r'^blog/', include('blog.urls')),
-	
+
 	    url(r'^admin/', include(admin.site.urls)),
 	)
 
@@ -111,7 +111,7 @@ Enregistrez les modifications, lancez le serveur de développement Django et lai
 
 Si c'est le cas, félicitations, vous venez de créer votre première vue !
 
-Organiser proprement vos URL 
+Organiser proprement vos URL
 ----------------------------
 
 Dans la partie précédente, nous avions parlé de deux avantages importants de Django : la réutilisation d'applications et la structuration du code. Sauf qu'évidemment, un problème se pose avec l'utilisation des URL que nous avons faites : si nous avons plusieurs applications, toutes les URL de celles-ci iraient dans` urls.py` du projet, ce qui compliquerait nettement la réutilisation d'une application et ne structure en rien votre code.
@@ -123,7 +123,7 @@ En effet, il faudrait sans cesse recopier toutes les URL d'une application en l'
 Tout d'abord, il faut créer un fichier `urls.py` dans le dossier de votre application, ici `blog`. Ensuite, il suffit d'y réécrire l'URL que nous avons déjà écrite précédemment (ne pas oublier l'importation des modules nécessaires !) :
 
 	from django.conf.urls import patterns, url
-	
+
 	urlpatterns = patterns('',
 	    url(r'^accueil$', 'blog.views.home'),
 	)
@@ -161,16 +161,16 @@ Maintenant, imaginez que votre application « blog » change de nom, vous allez 
 Tout est beaucoup plus simple et facilement éditable. Le module par défaut ici est `blog.views`, car toutes les vues viennent de ce fichier-là ; cela est désormais possible, car nous avons scindé notre `urls.py` principal en plusieurs `urls.py` propres à chaque application.
 
 Finalement, notre `blog/urls.py` ressemble à ceci pour le moment :
-	
+
 	from django.conf.urls import patterns, url
-	
+
 	urlpatterns = patterns('blog.views',
 	    url(r'^accueil/$', 'home'),
 	)
 
 Ne négligez pas cette solution, utilisez-la dès maintenant ! Il s'agit d'une excellente méthode pour structurer votre code, parmi tant d'autres que Django offre. Pensez aux éventuels développeurs qui pourraient maintenir votre projet après vous et qui n'ont pas envie de se retrouver avec une structure proche de l'anarchie.
 
-Passer des arguments à vos vues 
+Passer des arguments à vos vues
 -------------------------------
 
 Nous avons vu comment lier des URL à des vues et comment les organiser. Cependant, un besoin va bientôt se faire sentir : pouvoir passer des paramètres dans nos adresses directement. Si vous observez les adresses du site Instagram (qui est basé sur Django), le lien vers une photo est construit ainsi : `http://instagr.am/p/*******` où `*******` est une suite de caractères alphanumériques. Cette suite représente en réalité l'identifiant de la photo sur le site et permet à la vue de récupérer les informations en relation avec cette photo.
@@ -189,7 +189,7 @@ Lorsque l'URL `/blog/article/42` est demandée, Django regarde le routage et ex�
 	    """ Vue qui affiche un article selon son identifiant (ou ID, ici un numéro)
 	        Son ID est le second paramètre de la fonction (pour rappel, le premier
 	        paramètre est TOUJOURS la requête de l'utilisateur) """
-	
+
 	    text = "Vous avez demandé l'article n°{0} !".format(id_article)
 	    return HttpResponse(text)
 
@@ -209,7 +209,7 @@ Et la vue correspondante :
 
 	def list_articles(request, month, year):
 	    """ Liste des articles d'un mois précis. """
-	
+
 	    text = "Vous avez demandé les articles de {0} {1}.".format(month, year)
 	    return HttpResponse(text)
 
@@ -221,7 +221,7 @@ Il faut juste s'assurer que les noms de variables donnés dans le fichier `urls.
 
 Pour terminer, sachez qu'il est toujours possible de passer des paramètres GET. Par exemple : `http://www.crepes-bretonnes.com/blog/article/1337?ref=twitter`. Django tentera de trouver le pattern correspondant en ne prenant en compte que ce qui est avant les paramètres GET, c'est-à-dire `/blog/article/1337/`. Les paramètres passés par la méthode GET sont bien évidemment récupérables, via le dictionnaire `request.GET`, ce que nous verrons plus tard.
 
-Des réponses spéciales 
+Des réponses spéciales
 ----------------------
 Jusqu'ici, nous avons vu comment renvoyer une page HTML standard. Cependant, il se peut que nous souhaitions renvoyer autre chose que du HTML : une erreur 404 (page introuvable), une redirection vers une autre page, etc.
 
@@ -232,12 +232,12 @@ Parfois, une URL correspond bien à un pattern mais ne peut tout de même pas ê
 Voici un rapide exemple d'une vue compatible avec une des règles de routage que nous avons décrites dans le sous-chapitre précédent :
 
 	from django.http import HttpResponse, Http404
-	
+
 	def view_article(request, id_article):
         # Si l'ID est supérieur à 100, nous considérons que l'article n'existe pas
-	    if int(id_article) > 100:  
+	    if int(id_article) > 100:
 	        raise Http404
-	
+
 	    return HttpResponse('<h1>Mon article ici</h1>')
 
 Si à l'appel de la page l'argument `id_article` est supérieur à 100, la page retournée sera une erreur 404 de Django, visible à la figure suivante. Il est bien entendu possible de personnaliser par la suite cette vue, avec un template, afin d'avoir une page d'erreur qui soit en accord avec le design de votre site, mais cela ne fonctionne uniquement qu'avec `DEBUG = False` dans le `settings.py` (en production donc). Si vous êtes en mode de développement, vous aurez toujours une erreur similaire à la figure suivante.
@@ -251,10 +251,10 @@ Le second cas que nous allons aborder concerne les redirections. Il arrive que v
 Si par exemple vous voulez que votre vue, après une certaine opération, redirige vos visiteurs vers le site de Django, il faudrait procéder ainsi :
 
 	from django.shortcuts import redirect
-	
+
 	def list_articles(request, year, month):
 	    # Il veut des articles ? Soyons fourbe et redirigeons le vers djangoproject.com
-	    return redirect("https://www.djangoproject.com") 
+	    return redirect("https://www.djangoproject.com")
 
 N'oubliez pas qu'une URL valide pour accéder à cette vue serait `/blog/articles/2005/05`.
 
@@ -262,15 +262,15 @@ Cependant, si vous souhaitez rediriger votre visiteur vers une autre page de vot
 
 	from django.http import HttpResponse, Http404
 	from django.shortcuts import redirect
-	
+
 	def view_article(request, id_article):
 	    if int(id_article) > 100:
 	        raise Http404
-	
+
 	    return redirect(view_redirection)
-	
+
 	def view_redirection(request):
-	    return HttpResponse(u"Vous avez été redirigé sur cette page.")  
+	    return HttpResponse(u"Vous avez été redirigé sur cette page.")
 
 	# Ne pas oublier dans le fichier blogs/urls.py :
 	url(r'^redirection/$', 'view_redirection'),
@@ -283,7 +283,7 @@ Si nous souhaitions rediriger un visiteur vers la vue `view_article` définie pr
 
 	return redirect('blog.views.view_article', id_article=42)
 
-Pourquoi est-ce que nous utilisons une chaîne de caractères pour désigner la vue maintenant, au lieu de la fonction elle-même ? 
+Pourquoi est-ce que nous utilisons une chaîne de caractères pour désigner la vue maintenant, au lieu de la fonction elle-même ?
 
 En fait, il est possible d'indiquer une vue de trois manières différentes :
 
