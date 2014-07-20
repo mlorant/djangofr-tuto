@@ -27,7 +27,7 @@ Honnêtement, il n'existe pas vraiment de désavantages à utiliser un framework
 Qu'est-ce que Django ?
 ----------------------
 
-Django est donc un framework Python _destiné au web_. Ce n'est pas le seul dans sa catégorie, nous pouvons compter d'autres frameworks Python du même genre comme [web2py](http://www.web2py.com/), [TurboGears](http://www.turbogears.org/) ou [Flask](http://flask.pocoo.org/). Il a cependant le mérite d'être le plus exhaustif, d'automatiser un bon nombre de choses et de disposer d'une très grande communauté.
+Django est donc un framework Python _destiné au web_. Ce n'est pas le seul dans sa catégorie, nous pouvons compter d'autres frameworks Python du même genre comme [web2py](http://www.web2py.com/), [TurboGears](http://www.turbogears.org/), [Tornado](http://www.tornadoweb.org/en/stable/) ou encore [Flask](http://flask.pocoo.org/). Il a cependant le mérite d'être le plus exhaustif, d'automatiser un bon nombre de choses et de disposer d'une très grande communauté.
 
 ![Le logo de Django](images/logo-django.png "Le logo de Django")
 
@@ -48,9 +48,10 @@ Django a pu appliquer sa philosophie de plusieurs manières. Par exemple, l'admi
 
 Évidemment, Django dispose des avantages de tous les frameworks en général. Il est soutenu par une communauté active et expérimentée, qui publie régulièrement de nouvelles versions du framework avec de nouvelles fonctionnalités, des corrections de bugs, etc.
 
-Encore un point, et non des moindres, la communauté autour de Django a rédigé au fil des années une documentation très complète sur [docs.djangoproject.com](http://docs.djangoproject.com/). Bien que celle-ci soit en anglais, elle reste très accessible pour des francophones. Nous ne pouvons que vous conseiller de la lire en parallèle de ce cours si vous voulez approfondir un certain sujet ou si certaines zones d'ombre persistent.
+Encore un point, et non des moindres, la communauté autour de Django a rédigé au fil des années une documentation très complète sur [docs.djangoproject.com](http://docs.djangoproject.com/). Bien que celle-ci soit en anglais, elle reste très accessible pour des francophones et [une traduction française est disponible](https://docs.djangoproject.com/fr/stable/). Nous ne pouvons que vous conseiller de la lire en parallèle de ce cours si vous voulez approfondir un certain sujet ou si certaines zones d'ombre persistent.
 
-Enfin, pour gagner encore plus de temps, les utilisateurs de Django ont généralement l'esprit _open source_ et fournissent une liste de _snippets_, des portions de code réutilisables par n'importe qui. Le site [djangosnippets.org](http://djangosnippets.org/) est dédié à ces _snippets_. Si vous devez vous attaquer à une grosse application ou à une portion de code particulièrement difficile, n'hésitez pas à aller chercher dans ces _snippets_, vous y trouverez souvent votre bonheur !
+Enfin, pour gagner encore plus de temps, les utilisateurs de Django ont généralement l'esprit _open source_ et fournissent une liste de _snippets_, des portions de code réutilisables par n'importe qui. Le site [djangosnippets.org](http://djangosnippets.org/) est dédié à ces _snippets_. Si vous devez vous attaquer à une grosse application ou à une portion de code particulièrement difficile, n'hésitez pas à aller chercher dans ces _snippets_, vous y trouverez souvent votre bonheur !  
+Dans le même esprit, de nombreuses applications, prêtes à être utilisées, sont disponible via [Django Packages](https://www.djangopackages.com/) notamment.
 
 
 
@@ -67,9 +68,9 @@ Sous Linux et Mac OS, la méthode la plus simple et universelle consiste à inst
 
 <div class="info">Pypi est l'index des paquets Python de référence. Il contient les paquets de dizaines de milliers de projets Python, prêt à être utilisé pour vos propres projets. Grâce à pip, il est possible d'installer ces paquets en une seule commande mais aussi gérer les dépendances de vos projets facilement.</div>
 
-Si vous n'avez jamais utilisé `pip`, il vous faut d'abord que vous l'installiez. Utilisez votre gestionnaire de paquets préféré et installez le paquet `python-pip`. Par exemple, sous Debian et Ubuntu :
+Si vous n'avez jamais utilisé `pip`, il vous faut d'abord que vous l'installiez. Utilisez votre gestionnaire de paquets préféré et installez le paquet `python3-pip`. Par exemple, sous Debian et Ubuntu :
 ```
-apt-get install python-pip
+apt-get install python3-pip
 ```
 
 Ensuite, vous n'avez plus qu'à installer le paquet Django, via pip :
@@ -92,7 +93,7 @@ Contrairement aux environnements UNIX, l'installation de Django sous Windows req
 
 Validez, puis quittez. Nous pouvons désormais installer Django via la console Windows (<kbd>Windows</kbd> + <kbd>R</kbd> puis la commande `cmd`) :
 
-    cd C:\Users\<nom_utilisateur>\Downloads\django1.7  # A adapter à votre répertoire de téléchargement 
+    cd C:\Users\<nom_utilisateur>\Downloads\django1.7  # À adapter à votre répertoire de téléchargement 
     python setup.py install
 
 Les fichiers sont ensuite copiés dans votre dossier d'installation Python (ici `C:\Python27`).
@@ -100,7 +101,7 @@ Les fichiers sont ensuite copiés dans votre dossier d'installation Python (ici 
 
 ### Vérification de l'installation
 
-Dès que vous avez terminé l'installation de Django, lancez une nouvelle console Windows, puis lancez l'interpréteur Python (via la commande python) et tapez les deux lignes suivantes :
+Dès que vous avez terminé l'installation de Django, lancez une nouvelle console, puis lancez l'interpréteur Python (via la commande python) et tapez les deux lignes suivantes :
 
     >>> import django
     >>> print django.get_version()
@@ -120,4 +121,4 @@ En résumé
 - Un framework (cadre de travail en français) est un ensemble d'outils qui simplifie le travail d'un développeur.
 - Un framework est destiné à des développeurs, et non à des novices. Un framework nécessite un temps d'apprentissage avant de pouvoir être pleinement utilisé.
 - Django est un framework web pour le langage Python très populaire, très utilisé par les entreprises dans le monde : Mozilla, Instagram ou encore la NASA l'ont adopté !
-- Ce cours traite de la version 1.7, sortie en mai 2014. Nous ne garantissons pas que les exemples donnés soient compatibles avec des versions antérieures et postérieures.
+- Ce cours traite de la version 1.7, sortie en septembre 2014. Nous ne garantissons pas que les exemples donnés soient compatibles avec des versions antérieures et postérieures.
