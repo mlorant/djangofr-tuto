@@ -187,8 +187,6 @@ Dans la vue, nous sommes obligés de surcharger `get_queryset`, qui renvoie la l
         def get_queryset(self):
            return Article.objects.filter(categorie__id=self.args[0])
 
-En plus des arguments, il est également possible d'accéder à la requête, via `self.request` qui est alors le même objet que dans une vue classique.
-
 Tâchez tout de même de vous poser des limites, le désavantage ici est le suivant : la lecture de votre `urls.py` devient plus difficile, tout comme votre vue (imaginez si vous avez quatre arguments, à quoi correspond le deuxième ? le quatrième ?).
 
 Enfin, il est possible d'ajouter des éléments au contexte, c'est-à-dire les variables qui sont renvoyées au template. Par exemple, renvoyer l'ensemble des catégories, afin de faire une liste de liens vers celles-ci. Pour ce faire, nous allons ajouter au tableau `context` une clé `categories` qui contiendra notre liste :
@@ -209,3 +207,59 @@ Il est facile d'afficher la liste des catégories dans notre template :
     {% endfor %}
     </ul>
 
+Afficher un article via DetailView
+----------------------------------
+
+Malgré tout cela, nous ne pouvons afficher que des listes, et non pas un objet précis. Heureusement, la plupart des principes vus précédemment avec les classes héritant de `ListView` sont applicables avec celles qui héritent de `DetailView`. Le but de `DetailView` est de renvoyer un seul objet d'un modèle, et non une liste. Pour cela, il va falloir passer un paramètre bien précis dans notre URL : `pk`, qui représentera *la clé primaire de l'objet à récupérer* :
+
+    from blog.views import ListeArticles, LireArticle
+    
+    urlpatterns = patterns('blog.views',
+        url(r'^categorie/(\w+)$', ListeArticles.as_view(), name='blog_categorie'),
+        url(r'^article/(?P<pk>\d+)$', LireArticle.as_view(), name='blog_lire'),
+    )
+
+Maintenant que nous avons notre URL, avec la clé primaire en paramètre, il nous faut écrire la classe qui va récupérer l'objet voulu et le renvoyer à un template précis :
+
+    from django.views.generic import DetailView 
+
+    class LireArticle(DetailView):
+        context_object_name = "article"
+        model = Article
+        template_name = "blog/lire.html"
+
+… et encore une fois l'ancienne vue devient inutile. Souvenez-vous que notre fonction `lire` gérait le cas où l'ID de l'article n'existait pas, il en est de même ici. Comme tout à l'heure, vu que nous avons nommé notre objet `article`, il n'y a *aucune modification à faire* dans le template :
+
+    <h1>{{ article.titre }} <span class="small">dans {{ article.categorie.nom }}</span></h1>
+    <p class="infos">Rédigé par {{ article.auteur }}, le {{ article.date|date:"DATE_FORMAT" }}</p>
+    <div class="contenu">{{ article.contenu|linebreaks }}</div>
+
+Comme pour les `ListView`, il est possible de personnaliser la sélection avec get_queryset, afin de ne sélectionner l'article que s'il est public par exemple. Une autre spécificité utile lorsque nous affichons un objet, c'est d'avoir la possibilité de modifier un de ses attributs, par exemple son nombre de vues ou sa date de dernier accès. Pour faire cette opération, il est possible de surcharger la méthode `get_object`, qui renvoie l'objet à afficher :
+
+    class LireArticle(DetailView):
+        context_object_name = "article"
+        model = Article
+        template_name = "blog/lire.html"
+    
+        def get_object(self):
+            # Nous récupérons l'objet, via la super-classe
+            article = super().get_object()
+        
+            article.nb_vues += 1  # Imaginons que nous ayons un attribut « Nombre de vues »
+            article.save()
+        
+            return article
+
+Enfin, sachez que la variable `request`, qui contient les informations sur la requête et l'utilisateur, est également disponible dans les vues génériques. C'est un *attribut de la classe*, que vous pouvez donc appeler dans n'importe quelle méthode via `self.request`.
+
+Agir sur les données
+--------------------
+
+Jusqu'ici, nous n'avons fait qu'*afficher des données*, statiques ou en provenance de modèles. Nous allons maintenant nous occuper de la gestion de données. Pour cette partie, nous reprendrons comme exemple notre application de raccourcisseur d'URL que nous avons développée lors du chapitre précédent. Pour rappel, dans le [schéma CRUD](https://fr.wikipedia.org/wiki/CRUD), il y a quatre types d'actions applicables sur une donnée :
+
+- `Create` (créer) ;
+- `Read` (lire, que nous avons déjà traité juste au-dessus) ;
+- `Update` (mettre à jour) ;
+- `Delete` (supprimer).
+
+Nous montrerons comment réaliser ces opérations dans l'ordre indiqué. En effet, chacune possède une vue générique associée.
