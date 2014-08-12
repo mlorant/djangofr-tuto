@@ -36,7 +36,7 @@ Les gestionnaires de bases de données SQL sont les plus populaires et les plus 
 Voici un simple exemple de requête SQL qui renvoie toutes les entrées de la table films dont le réalisateur doit être Quentin Tarantino et qui sont triées par date de sortie :	
 
     SELECT titre, annee_sortie, note FROM films 
-    WHERE realisateur="Quentin Tarantino" ORDER BY annee_sortie
+    WHERE realisateur="Quentin Tarantino" ORDER BY annee_sortie;
 
 On a déjà vu plus simple, mais voilà comment communiquent un serveur SQL et un client. Il existe bien d'autres commandes (une pour chaque type de requête : sélection, mise à jour, suppression…) et chaque commande possède ses paramètres.
 
@@ -50,7 +50,7 @@ Voici quelques gestionnaires SQL bien connus (dont vous avez sûrement déjà d�
 - **Microsoft SQL Server** : payant, développé par Microsoft ;
 - **SQLite** : très léger, gratuit, et très simple à installer (en réalité, il n'y a rien à installer avec Django).
 
-Lors de la configuration de votre projet Django dans le chapitre précédent, nous vous avons conseillé d'utiliser SQLite. Pourquoi ? Car contrairement aux autres SGBD qui ont besoin d'un serveur lancé en permanence pour traiter les données, une base de données SQLite consiste en un simple fichier. C'est la bibliothèque Python (nommée `sqlite3`) qui se chargera de modifier et renvoyer les données de la base. C'est très utile en développement, car il n'y a rien à installer, mais en production mieux vaut utiliser un SGBD plus performant comme MySQL.
+Lors de la configuration de votre projet Django dans le chapitre précédent, nous vous avons conseillé d'utiliser SQLite. Pourquoi ? Car contrairement aux autres SGBD qui ont besoin d'un serveur lancé en permanence pour traiter les données, une base de données SQLite consiste en un simple fichier. C'est la bibliothèque Python (nommée `sqlite3`) qui se chargera de modifier et renvoyer les données de la base. C'est très utile en développement, car il n'y a rien à installer, mais en production mieux vaut utiliser un SGBD plus performant comme MySQL ou PostgreSQL.
 
 
 La magie des ORM
