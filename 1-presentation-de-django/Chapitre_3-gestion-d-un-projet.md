@@ -123,7 +123,7 @@ Juste après la base de données, nous avons quelques variables pour définir la
 Il y a ensuite les variables `USE_I18N`, `USE_L10N` et `USE_TZ` qui sont toutes à `True`. Elles permettent entre autres d'activer l'internationalisation et ainsi avoir l'interface en français, la répresentation des jours au format `dd/mm/YYYY` et d'autres détails. 
     
 Voilà ! Les variables les plus importantes ont été expliquées. Pour que ce ne soit pas indigeste, nous n'avons pas tout traité, **il en reste en effet beaucoup d'autres**. De nombreuses variables ne sont pas présentes dans ce fichier par défaut et ont une valeur déjà définie par le framework.   
-Nous reviendrons sur certains paramètres plus tard. En attendant, si une variable vous intrigue, n'hésitez pas à lire le commentaire (bien qu'en anglais) à côté de la déclaration et à vous référer à [la documentation en ligne](https://docs.djangoproject.com/en/dev/ref/settings/).
+Nous reviendrons sur certains paramètres plus tard. En attendant, si une variable vous intrigue, n'hésitez pas à lire le commentaire (bien qu'en anglais) à côté de la déclaration et à vous référer à [la documentation en ligne](https://docs.djangoproject.com/en/stable/ref/settings/).
 
 
 Créons notre première application 
@@ -155,7 +155,7 @@ Comme avec `startproject`, `startapp` crée un dossier avec plusieurs fichiers e
 
 Si vous avez suivi, certains noms de fichiers sont relativement évidents. Nous allons les voir un à un dans les prochains chapitres : 
 
-- `admin.py` va permettre de définir ce que vous souhaitez afficher et pouvoir modifier dans l'administration de l'application. 
+- `admin.py` va permettre de définir ce que vous souhaitez afficher et pouvoir modifier dans l'administration de l'application ; 
 - `models.py` contiendra vos modèles ;
 - `tests.py` permet la création de tests unitaires (un chapitre y est consacré dans la quatrième partie de ce cours) ;
 - `views.py` contiendra toutes les vues de votre application.
