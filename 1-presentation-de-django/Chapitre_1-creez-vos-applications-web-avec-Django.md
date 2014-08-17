@@ -104,7 +104,7 @@ Les fichiers sont ensuite copiés dans votre dossier d'installation Python (ici 
 Dès que vous avez terminé l'installation de Django, lancez une nouvelle console, puis lancez l'interpréteur Python (via la commande python) et tapez les deux lignes suivantes :
 
     >>> import django
-    >>> print django.get_version()
+    >>> django.get_version()
     1.7  # <- Résultat attendu
 
 Si vous obtenez également 1.7 comme réponse, félicitations, **vous avez correctement installé Django** !

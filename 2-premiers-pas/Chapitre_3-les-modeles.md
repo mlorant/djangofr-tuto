@@ -11,7 +11,6 @@ Un modèle s'écrit sous la forme d'une classe et représente une table dans la 
 
 Tout modèle Django se doit d'hériter de la classe mère `Model` incluse dans `django.db.models` (sinon il ne sera pas pris en compte par le framework). Par défaut, le fichier `models.py` généré automatiquement importe le module `models` de `django.db`. Voici un simple exemple de modèle représentant un article de blog :
 
-    #-*- coding: utf-8 -*-
     from django.db import models
     class Article(models.Model):
         titre = models.CharField(max_length=100)
@@ -75,7 +74,7 @@ Vous pourriez vous demander pourquoi n'avons-nous pas mis de valeur à l'attribu
 
 Nous pouvons bien évidemment accéder aux attributs de l'objet comme pour n'importe quel autre objet Python :
 
-    >>> print article.auteur
+    >>> article.auteur
     Maxime
 
 Pour sauvegarder l'entrée dans la base de données (les modifications ne sont pas enregistrées en temps réel), il suffit d'appeler la méthode `save`, de la classe mère `Model` dont hérite chaque modèle :
@@ -116,14 +115,14 @@ L'ensemble renvoyé par la fonction n'est pas une vraie liste, mais un `QuerySet
 Nous pouvons donc par exemple afficher les différents titres de nos articles :
 
     >>> for article in Article.objects.all():
-    ... print article.titre
+    ... print(article.titre)
     Les crêpes
     La Bretagne
 
 Maintenant, imaginons que vous souhaitiez sélectionner tous les articles d'un seul auteur uniquement. La méthode `filter` a été conçue dans ce but. Elle prend en paramètre une valeur d'un ou plusieurs attributs et va passer en revue toutes les entrées de la table et ne sélectionner que les instances qui ont également la valeur de l'attribut correspondant. Par exemple :
 
     >>> for article in Article.objects.filter(auteur="Maxime"):
-    ... print article.titre, "par", article.auteur
+    ... print(article.titre, "par", article.auteur)
     La Bretagne par Maxime
 
 Efficace ! L'autre article n'a pas été repris dans le `QuerySet`, car son auteur n'était pas Maxime mais Mathieu.
@@ -131,7 +130,7 @@ Efficace ! L'autre article n'a pas été repris dans le `QuerySet`, car son aute
 Une méthode similaire à `filter` existe, mais fait le contraire : `exclude`. Comme son nom l'indique, elle exclut les entrées dont la valeur des attributs passés en arguments coïncide :
 
     >>> for article in Article.objects.exclude(auteur="Maxime"):
-    ... print article.titre, "par", article.auteur
+    ... print(article.titre, "par", article.auteur)
     Les crêpes par Mathieu
 
 Sachez que vous pouvez également filtrer ou exclure des entrées à partir de plusieurs champs : `Article.objects.filter(titre="Coucou", auteur="Mathieu")` renverra un `QuerySet` vide, car il n'existe aucun article de Mathieu intitulé « Coucou ».
@@ -179,7 +178,7 @@ Premièrement, `get`, comme son nom l'indique, permet d'obtenir une et une seule
     >>> Article.objects.get(titre="Je n'existe pas")
     ...
     DoesNotExist: Article matching query does not exist. Lookup parameters were {'titre': "Je n'existe pas"}
-    >>> print Article.objects.get(auteur="Mathieu").titre
+    >>> Article.objects.get(auteur="Mathieu").titre
     Les crêpes
     >>> Article.objects.get(titre__contains="L")
     ...
@@ -237,7 +236,7 @@ La base de données étant prête, ouvrez à nouveau un shell via manage.py shel
 
 Pour accéder aux attributs et méthodes de la catégorie associée à l'article, rien de plus simple :
 
-    >>> print art.categorie.nom
+    >>> art.categorie.nom
     Crêpes
 
 Dans cet exemple, si un article ne peut avoir qu'une seule catégorie, une catégorie peut en revanche avoir plusieurs articles. Pour réaliser l'opération en sens inverse (accéder aux articles d'une catégorie depuis cette dernière), une sous-classe s'est créée toute seule avec la `ForeignKey` :

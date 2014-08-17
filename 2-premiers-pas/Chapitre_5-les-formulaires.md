@@ -12,8 +12,8 @@ Si les modèles ont leurs fichiers `models.py`, les formulaires n'ont malheureus
 
 Un formulaire hérite donc de la classe mère `Form` du module `django.forms`. Tous les champs sont bien évidemment également dans ce module et reprennent la plupart du temps les mêmes noms que ceux des modèles. Voici un bref exemple de formulaire de contact :
 
-    #-*- coding: utf-8 -*-
     from django import forms
+
     class ContactForm(forms.Form):
         sujet = forms.CharField(max_length=100)
         message = forms.CharField(widget=forms.Textarea)
@@ -77,7 +77,7 @@ La voici :
 
 Si le formulaire est valide, un nouvel attribut de l'objet `form` est apparu, il nous permettra d'accéder aux données : `cleaned_data`. Ce dernier va renvoyer un dictionnaire contenant comme clés les noms de vos différents champs (les mêmes noms qui ont été renseignés dans la déclaration de la classe), et comme valeurs les données validées de chaque champ. Par exemple, nous pourrions accéder au sujet du message ainsi :
 
-    print form.cleaned_data["sujet"]
+    >>> form.cleaned_data["sujet"]
     "Le super sujet qui a été envoyé"
 
 Côté utilisateur, cela se passe en trois étapes :
