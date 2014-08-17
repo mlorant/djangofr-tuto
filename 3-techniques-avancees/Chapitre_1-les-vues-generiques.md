@@ -322,7 +322,6 @@ Le comportement de cette classe est similaire à notre ancienne vue `nouveau()` 
 Notre template est déjà prêt pour cette vue, puisque l'objet `Form` renvoyé par cette vue générique est nommé `form`, en minuscules, comme nous l'avions fait avec l'ancienne méthode. Il nous faut juste éditer le fichier `urls.py` :
 
 ```python
-#-*- coding: utf-8 -*-
 from django.conf.urls import patterns, url
 from views import URLCreate
 
@@ -376,3 +375,121 @@ Désormais, vous pouvez accéder à l'édition d'un objet `MiniURL`. Pour y acc�
 
 Vous pouvez le constater sur la figure suivante : le résultat est satisfaisant. Bien évidemment, la vue est très minimaliste : n'importe qui peut éditer tous les liens, il n'y a pas de message de confirmation, etc. Par contre, il y a une gestion des objets qui n'existe pas en renvoyant une page d'erreur 404, des formulaires incorrects, etc. Tout cela est améliorable.
 
+# screenshot ici
+
+#### Améliorons nos URL avec la méthode get_object()
+
+Pour le moment, nous utilisons l'identifiant numérique, nommé `pk`, qui est la clé primaire dans l'URL. Ce n'est pas forcément le meilleur choix (pour le référencement par exemple). Nous pourrions prendre le code présent dans l'URL réduite.
+
+![Ce que nous avons actuellement et ce que nous souhaitons avoir](images/url_pk_et_cle.png)
+
+Nous savons que chaque entrée possède un code unique donc il n'y a pas de soucis d'unicité. Surchargeons donc la méthode `get_object`, qui s'occupe de récupérer l'objet à mettre à jour.
+
+```python
+class URLUpdate(UpdateView):
+    model = MiniURL
+    template_name = 'mini_url/nouveau.html'
+    form_class = MiniURLForm
+    success_url = reverse_lazy(liste)
+
+    def get_object(self, queryset=None):
+           code = self.kwargs.get('code', None)
+           return get_object_or_404(MiniURL, code=code)
+```
+
+Nous utilisons encore une fois la fonction `get_object_or_404`, qui nous permet de renvoyer une page d'erreur si jamais le code demandé n'existe pas. Le code de l'adresse est accessible depuis le dictionnaire `self.kwargs`, qui contient les arguments nommés dans l'URL (précédemment, les arguments de `ListView` n'étaient pas nommés). Il faut donc changer un peu `urls.py` également, pour accepter l'argument `code`, qui prend des lettres et des chiffres :
+
+```python
+url(r'^edition/(?P<code>\w{6})/$', URLUpdate.as_view(), name='url_update'),  # Le code est composé de 6 chiffres/lettres
+```
+
+
+#### Effectuer une action lorsque le formulaire est validé avec form_valid()
+
+De la même façon, il est possible de changer le comportement lorsque le formulaire est validé, en redéfinissant la méthode `form_valid`. Cette méthode est appelée dès qu'un formulaire est soumis et considéré comme validé. Par défaut, il s'occupe _d'enregistrer les modifications et de rediriger l'utilisateur_, mais vous pouvez très bien changer son comportement :
+
+
+```python
+def form_valid(self, form):
+    self.object = form.save()
+    messages.success(self.request, "Votre profil a été mis à jour avec succès.")  # Envoi d'un message à l'utilisateur
+    return HttpResponseRedirect(self.get_success_url())
+```
+
+
+Ici, nous précisons à l'utilisateur, au moyen d'une méthode particulière, que l'édition s'est bien déroulée. Grâce à ce genre de méthodes, vous pouvez affiner le fonctionnement de votre vue, tout en conservant la puissance de la généricité.
+
+### DeleteView
+
+Pour terminer, attaquons-nous à la suppression d'un objet. Comme pour `UpdateView`, cette vue prend un objet et demande la confirmation de suppression. Si l'utilisateur confirme, alors la suppression est effectuée, puis l'utilisateur est redirigé. Les attributs de la vue sont donc globalement identiques à ceux utilisés précédemment :
+
+
+```python
+class URLDelete(DeleteView):
+    model = MiniURL
+    context_object_name = 'mini_url'
+    template_name = 'mini_url/supprimer.html'
+    success_url = reverse_lazy(liste)
+
+    def get_object(self, queryset=None):
+        code = self.kwargs.get('code', None)
+        return get_object_or_404(MiniURL, code=code)
+```
+
+Toujours pareil, la vue est associée à notre modèle, un template, et une URL à cibler en cas de réussite. Nous avons encore une fois la sélection de notre objet via le code assigné en base plutôt que la clé primaire. Cette fois-ci, nous devons créer notre template `supprimer.html`, qui demandera juste à l'utilisateur s'il est sûr de vouloir supprimer, et le cas échéant le redirigera vers la liste.
+
+
+```html
+<h1>Êtes-vous sûr de vouloir supprimer cette URL ?</h1>
+
+<p>{{ mini_url.code }} -> {{ mini_url.url }} (créée le {{ mini_url.date|date:"DATE_FORMAT" }})</p>
+
+<form method="post" action="">
+   {% csrf_token %}  <!-- Nous prenons bien soin d'ajouter le csrf_token -->
+   <input type="submit" value"Oui, supprime moi ça" /> - <a href="{% url "url_liste" %}">Pas trop chaud en fait</a>
+</form>
+```
+
+Encore une fois, notre ligne en plus dans le fichier `urls.py` ressemble beaucoup à celle de `URLUpdate` :
+
+
+```python
+url(r'^supprimer/(?P<code>\w{6})/$', URLDelete.as_view(), name='url_delete'),  # Ne pas oublier l'import de URLDelete !
+```
+
+Afin de faciliter le tout, deux liens ont été ajoutés dans la liste définie dans le template `liste.html`, afin de pouvoir mettre à jour ou supprimer une URL rapidement : 
+
+
+```html
+<h1>Le raccourcisseur d'URL spécial crêpes bretonnes !</h1>
+
+<p><a href="{% url "url_nouveau" %}">Raccourcir une URL.</a></p>
+
+<p>Liste des URL raccourcies :</p>
+<ul>
+    {% for mini in minis %}
+    <li> <a href="{% url "url_update" mini.code %}">Mettre à jour</a> -  <a href="{% url "url_delete" mini.code %}">Supprimer</a>
+    | {{ mini.url }} via <a href="http://{{ request.get_host }}{% url "url_redirection" mini.code %}">{{ request.get_host }}{% url "url_redirection" mini.code %}</a>
+    {% if mini.pseudo %}par {{ mini.pseudo }}{% endif %} ({{ mini.nb_acces }} accès)</li>
+    {% empty %}
+    <li>Il n'y en a pas actuellement.</li>
+    {% endfor %}
+</ul>
+```
+
+
+Même refrain : nous enregistrons, et nous pouvons tester grâce au lien ajouté (voir la figure suivante). 
+
+![Notre vue, après avoir cliqué sur un des liens « Supprimer » qui apparaissent dans la liste](images/DeleteView.png)
+
+
+----------
+
+Ce chapitre touche à sa fin. Néanmoins, nous n'avons même pas pu vous présenter toutes les spécificités des vues génériques ! Il existe en effet une multitude de classes de vues génériques, mais aussi d'attributs et méthodes non abordés ici. Si vous voulez avoir une petite idée de l'étendue du sujet, [le site ccbv.co.uk](http://ccbv.co.uk) présente une documentation exhaustive sur les vues génériques de Django. 
+
+Nous avons essayé de vous présenter les plus communes, celles qui vous seront probablement le plus utile, mais il est clairement impossible de tout présenter sans être indigeste, vu la taille de ce diagramme. Par exemple, nous avons décidé de ne pas couvrir toutes les classes qui permettent de faire des pages de tri par date ou d'archives. 
+Si vous souhaitez en savoir plus, ces deux liens vous seront plus qu'utiles :
+
+
+- [Documentation officielle sur les vues génériques](https://docs.djangoproject.com/en/dev/ref/class-based-views/) ;
+- [Documentation non officielle mais très complète, listant les attributs et méthodes de chaque classe](http://ccbv.co.uk/).
