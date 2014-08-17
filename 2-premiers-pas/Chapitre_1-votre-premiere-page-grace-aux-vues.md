@@ -24,12 +24,12 @@ Commençons à travailler dans `blog/views.py`. Par défaut, Django a généré 
 
     # Create your views here.
 
-Pour éviter tout problème par la suite, indiquons à l'interpréteur Python que le fichier sera en UTF-8, afin de prendre en charge les accents. En effet, Django gère totalement l'UTF-8 et il serait bien dommage de ne pas l'utiliser. Insérez ceci comme première ligne de code du fichier, avant l'import :
+Si vous utilisez encore Python 2, pour éviter tout problème par la suite, indiquons à l'interpréteur Python que le fichier sera en UTF-8, afin de prendre en charge les accents. En effet, Django gère totalement l'UTF-8 et il serait bien dommage de ne pas l'utiliser. Insérez ceci comme première ligne de code du fichier, avant l'import :
 
     #-*- coding: utf-8 -*-
 
 
-<div class="info">Cela vaut pour tous les fichiers que nous utiliserons à l'avenir. Spécifiez toujours un encodage UTF-8 au début de ceux-ci !</div>
+<div class="info">Cela vaut pour tous les fichiers Python que nous utiliserons à l'avenir. Spécifiez toujours un encodage UTF-8 au début de ceux-ci ! Ceci ne concerne que Python 2 et est totalement facultatif pour Python 3</div>
 
 Désormais, nous pouvons créer une fonction qui remplira le rôle de la vue. Bien que nous n'ayons vu pour le moment ni les modèles, ni les templates, il est tout de même possible d'écrire une vue, mais celle-ci restera basique. En effet, il est possible d'écrire du code HTML directement dans la vue et de le renvoyer au client. On va pour le moment laisser de côté la méthode `render` déjà importé et utiliser `HttpResponse`, pour comprendre la base :
 
@@ -38,7 +38,7 @@ Désormais, nous pouvons créer une fonction qui remplira le rôle de la vue. Bi
 	from django.shortcuts import render
 
 	def home(request):
-        # On renvoie une page HTML non valide ici, pour que l'exemple soit concis
+        """ Exemple de page HTML, non valide pour que l'exemple soit concis """
 	    text = """<h1>Bienvenue sur mon blog !</h1>
 	              <p>Les crêpes bretonnes ça tue des mouettes en plein vol !</p>"""
 	    return HttpResponse(text)
@@ -190,7 +190,7 @@ Lorsque l'URL `/blog/article/42` est demandée, Django regarde le routage et ex�
 	        Son ID est le second paramètre de la fonction (pour rappel, le premier
 	        paramètre est TOUJOURS la requête de l'utilisateur) """
 
-	    text = "Vous avez demandé l'article n°{0} !".format(id_article)
+	    text = "Vous avez demandé l'article #{0} !".format(id_article)
 	    return HttpResponse(text)
 
 Il faut cependant faire attention à l'ordre des paramètres dans l'URL afin qu'il corresponde à l'ordre des paramètres de la fonction. En effet, lorsque nous souhaitons obtenir la liste des articles d'un mois précis, selon la troisième règle que nous avons écrite, il faudrait accéder à l'URL suivante pour le mois de juin 2012 : `/blog/articles/2012/06`.
