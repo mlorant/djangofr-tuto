@@ -556,7 +556,7 @@ Pour ajouter un utilisateur à un groupe, il faut utiliser la relation `ManyToMa
 
 ```python
 >>> from django.contrib.auth.models import User, Group
->>> group = Group(name=u"Les gens géniaux")
+>>> group = Group(name="Les gens géniaux")
 >>> group.save()
 >>> user = User.objects.get(username="Mathieu")
 >>> user.groups.add(group)
