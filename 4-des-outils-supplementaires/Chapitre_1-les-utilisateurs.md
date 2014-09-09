@@ -544,3 +544,24 @@ user.user_permissions.add(permission)
 ```
 
 Pour rappel, `user_permissions` est une relation `ManyToMany` de l'utilisateur vers la table des permissions.
+
+### Les groupes
+
+Un groupe est un regroupement d'utilisateurs auquel nous pouvons assigner des permissions. Une fois qu'un groupe dispose d'une permission, tous ses utilisateurs en disposent automatiquement aussi. Il s'agit donc d'un modèle, `django.contrib.auth.models.Group`, qui dispose des champs suivants :
+
+ - `name` : le nom du groupe (80 caractères maximum) ; 
+ - `permissions` : une relation `ManyToMany` vers les permissions, comme `user_permissions` pour les utilisateurs.
+
+Pour ajouter un utilisateur à un groupe, il faut utiliser la relation `ManyToMany` `groups` de `User` :
+
+```python
+>>> from django.contrib.auth.models import User, Group
+>>> group = Group(name=u"Les gens géniaux")
+>>> group.save()
+>>> user = User.objects.get(username="Mathieu")
+>>> user.groups.add(group)
+```
+
+Une fois cela fait, l'utilisateur « Mathieu » dispose de toutes les permissions attribuées au groupe « Les gens géniaux ». Il conserve également les permissions qui lui ont été attribué spécifiquement. La méthode `user.has_perm('app.nom_perm')` vérifie donc si l'utilisateur à cette permission ou s'il appartient à un groupe ayant la permission `app.nom_perm`.
+
+Voilà ! Vous avez désormais vu de long en large le système utilisateurs que propose Django. Vous avez pu remarquer qu'il est tout aussi puissant que flexible. Inutile donc de réécrire tout un système utilisateurs lorsque le framework en propose déjà un plus que correct.
