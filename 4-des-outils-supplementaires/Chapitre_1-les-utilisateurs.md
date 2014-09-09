@@ -565,3 +565,12 @@ Pour ajouter un utilisateur à un groupe, il faut utiliser la relation `ManyToMa
 Une fois cela fait, l'utilisateur « Mathieu » dispose de toutes les permissions attribuées au groupe « Les gens géniaux ». Il conserve également les permissions qui lui ont été attribué spécifiquement. La méthode `user.has_perm('app.nom_perm')` vérifie donc si l'utilisateur à cette permission ou s'il appartient à un groupe ayant la permission `app.nom_perm`.
 
 Voilà ! Vous avez désormais vu de long en large le système utilisateurs que propose Django. Vous avez pu remarquer qu'il est tout aussi puissant que flexible. Inutile donc de réécrire tout un système utilisateurs lorsque le framework en propose déjà un plus que correct.
+
+
+En résumé
+---------
+
+- Django propose une base de modèles qui permettent de décrire les utilisateurs et groupes d'utilisateurs au sein du projet. Ces modèles possèdent l'ensemble des fonctions nécessaires pour une gestion détaillée des objets : `make_password`, `check_password`…
+- Il est possible d'étendre le modèle d'utilisateur de base, pour ajouter ses propres champs.
+- Le framework dispose également de vues génériques pour la création d'utilisateurs, la connexion, l'inscription, la déconnexion, le changement de mot de passe… En cas de besoin plus spécifique, il peut être nécessaire de les réécrire soi-même.
+- Il est possible de restreindre l'accès à une vue aux personnes connectées via `@login_required` ou à un groupe encore plus précis via les permissions.
