@@ -462,3 +462,85 @@ Vous pouvez vous servir de cette vue pour afficher un message de confirmation ap
 
 Les permissions et les groupes
 ------------------------------
+
+Le système utilisateurs de Django fournit un système de permissions simple, permettant de déterminer si un utilisateur a le droit d'effectuer une certaine action ou non. Les groupes permettent quand à eux de définir des permissions communes à un ensemble d'utilisateurs.
+
+### Les permissions
+
+Une permission a la forme suivante :  `nom_application.nom_permission`. Django crée automatiquement trois permissions pour chaque modèle enregistré. Ces permissions sont notamment utilisées dans l'administration. Si nous reprenons par exemple le modèle `Article` de l'application `blog`, trois permissions sont créées par Django :
+
+- `blog.add_article` : la permission pour créer un article ;
+- `blog.change_article` : la permission pour modifier un article ;
+- `blog.delete_article` : la permission pour supprimer un article.
+
+Il est bien entendu possible de créer des permissions nous-mêmes. Chaque permission dépend d'un modèle et doit être renseignée dans sa sous-classe `Meta`. Petit exemple en reprenant notre modèle `Article` utilisé au début :
+
+```python
+class Article(models.Model):
+    titre = models.CharField(max_length=100)
+    auteur = models.CharField(max_length=42)
+    contenu = models.TextField()
+    date = models.DateTimeField(auto_now_add=True, auto_now=False, verbose_name="Date de parution")
+    categorie = models.ForeignKey(Categorie)
+
+    def __unicode__(self):
+        return self.titre
+
+    class Meta:
+        permissions = (
+                ("commenter_article", "Commenter un article"),
+                ("marquer_article", "Marquer un article comme lu"),
+        )
+```
+
+Pour ajouter de nouvelles permissions, il suffit de créer un tuple contenant les paires de vos permissions, avec à chaque fois le nom de la permission et sa description. Après avoir mis à jour la base de données (`createmigration` et `migrate`), il est ensuite possible d'assigner des permissions à un utilisateur dans l'administration (cela se fait depuis la fiche d'un utilisateur).
+
+Par la suite, pour vérifier si un utilisateur possède ou non une permission, la classe `User` possède la méthode `has_perm` : `user.has_perm("blog.commenter_article")`. La méthode renvoie `True` ou `False`, selon si l'utilisateur dispose de la permission ou non. Les permissions de l'utilisateur courant sont également accessibles depuis les templates, encore grâce à un _context processor_, `perms` :
+
+```jinja
+{% if perms.blog.commenter_article %}
+	<p><a href="/commenter/">Commenter</a></p>
+{% endif %}
+```
+
+Le lien ici ne sera affiché que si l'utilisateur dispose de la permission pour commenter.
+
+De même que pour le décorateur `login_required`, il existe un décorateur permettant de s'assurer que l'utilisateur qui souhaite accéder à la vue dispose bien de la permission nécessaire. Il s'agit de `django.contrib.auth.decorators.permission_required`.
+
+```python
+from django.contrib.auth.decorators import permission_required
+
+@permission_required('blog.commenter_article')
+def article_commenter(request, article):
+    …
+```
+
+Sachez qu'il est également possible de créer une permission dynamiquement. Pour cela, il faut importer le modèle `Permission`, situé dans `django.contrib.auth.models`. Ce modèle possède les attributs suivants :
+
+ - `name` : le nom de la permission, 50 caractères maximum.
+ - `content_type` : un `content_type` pour désigner le modèle concerné.
+ - `codename` : le nom de code de la permission.
+
+Donc, si nous souhaitons par exemple créer une permission « commenter un article » spécifique à chaque article, et ce à chaque fois que nous créons un nouvel article, voici comment procéder :
+
+```python
+from django.contrib.auth.models import Permission
+from blog.models import Article
+from django.contrib.contenttypes.models import ContentType
+
+…  # Récupération des données
+article.save()
+
+content_type = ContentType.objects.get(app_label='blog', model='Article')
+permission = Permission.objects.create(codename='commenter_article_{0}'.format(article.id),
+                                       name='Commenter l'article "{0}"'.format(article.titre),
+                                       content_type=content_type)
+```
+
+Une fois que la permission est créée, il est possible de l'assigner à un utilisateur précis de cette façon :
+
+```python
+user.user_permissions.add(permission)
+```
+
+Pour rappel, `user_permissions` est une relation `ManyToMany` de l'utilisateur vers la table des permissions.
