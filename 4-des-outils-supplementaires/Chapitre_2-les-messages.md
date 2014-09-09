@@ -107,3 +107,11 @@ messages.info(request, 'Message à but informatif.', fail_silently=True)
 ```  
 
 Dans ce cas, le message sera bien envoyé si les messages sont activés pour le projet en cours. Sinon la ligne sera ignorée, tout simplement.
+
+En résumé
+---------
+
+ - Les messages permettent d'afficher des notifications à l'utilisateur, en cas de succès ou d'échec lors d'une action, ou si un événement particulier se produit. 
+ - Il existe différents types de messages : ceux d'information, de succès, d'erreur, d'avertissement, et enfin de débogage.
+ - Il est possible de créer son propre type de message et de configurer son comportement.
+ - L'affichage de messages peut être limité : chaque type de message est caractérisé par une constante entière, et nous pouvons afficher les messages ayant un niveau supérieur ou égal à un certain seuil, via `messages.set_level`.
