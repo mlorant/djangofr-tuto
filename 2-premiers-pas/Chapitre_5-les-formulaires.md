@@ -20,7 +20,7 @@ Un formulaire hérite donc de la classe mère `Form` du module `django.forms`. T
         envoyeur = forms.EmailField(label="Votre adresse mail")
         renvoi = forms.BooleanField(help_text="Cochez si vous souhaitez obtenir une copie du mail envoyé.", required=False)
 
-Toujours très similaire aux formulaires, un champ peut avoir des arguments qui lui sont propres (ici `max_length` pour sujet), ou avoir des arguments génériques à tous les champs (ici `label`, `help_text`, `widget` et `required`).
+Tout comme les champs de modèles, un champ de formulaire peut avoir des arguments qui lui sont propres (ici `max_length` pour sujet), ou avoir des arguments génériques à tous les champs (ici `label`, `help_text`, `widget` et `required`).
 
 Un `CharField` enregistre toujours du texte. Notons une différence avec le `CharField` des modèles : l'argument `max_length` devient optionnel. L'attribut message qui est censé recueillir de grands et longs textes est, lui, identique.
 
