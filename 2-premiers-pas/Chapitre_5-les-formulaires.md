@@ -17,8 +17,8 @@ Un formulaire hérite donc de la classe mère `Form` du module `django.forms`. T
     class ContactForm(forms.Form):
         sujet = forms.CharField(max_length=100)
         message = forms.CharField(widget=forms.Textarea)
-        envoyeur = forms.EmailField(label=u"Votre adresse mail")
-        renvoi = forms.BooleanField(help_text=u"Cochez si vous souhaitez obtenir une copie du mail envoyé.", required=False)
+        envoyeur = forms.EmailField(label="Votre adresse mail")
+        renvoi = forms.BooleanField(help_text="Cochez si vous souhaitez obtenir une copie du mail envoyé.", required=False)
 
 Toujours très similaire aux formulaires, un champ peut avoir des arguments qui lui sont propres (ici `max_length` pour sujet), ou avoir des arguments génériques à tous les champs (ici `label`, `help_text`, `widget` et `required`).
 
@@ -204,10 +204,10 @@ Une fonctionnalité très pratique des `ModelForm` est qu'il n'y a pas besoin d'
     >>> from blog.models import Article, Categorie
     >>> from blog.forms import ArticleForm
     >>> donnees = {
-    ... 'titre':u"Les crêpes c'est trop bon",
+    ... 'titre':"Les crêpes c'est trop bon",
     ... 'slug':"les-crepes-cest-trop-bon",
     ... 'auteur':"Maxime",
-    ... 'contenu':u"Vous saviez que les crêpes bretonnes c'est trop bon ? La pêche c'est nul à côté.",
+    ... 'contenu':"Vous saviez que les crêpes bretonnes c'est trop bon ? La pêche c'est nul à côté.",
     ... 'categorie':Categorie.objects.all()[0].id  # Nous prenons l'identifiant de la première catégorie qui vient
     ... }
     >>> form = ArticleForm(donnees)
