@@ -33,7 +33,6 @@ Si vous utilisez encore Python 2, pour éviter tout problème par la suite, indi
 
 Désormais, nous pouvons créer une fonction qui remplira le rôle de la vue. Bien que nous n'ayons vu pour le moment ni les modèles, ni les templates, il est tout de même possible d'écrire une vue, mais celle-ci restera basique. En effet, il est possible d'écrire du code HTML directement dans la vue et de le renvoyer au client. On va pour le moment laisser de côté la méthode `render` déjà importé et utiliser `HttpResponse`, pour comprendre la base :
 
-	#-*- coding: utf-8 -*-
 	from django.http import HttpResponse
 	from django.shortcuts import render
 
@@ -42,6 +41,8 @@ Désormais, nous pouvons créer une fonction qui remplira le rôle de la vue. Bi
 	    text = """<h1>Bienvenue sur mon blog !</h1>
 	              <p>Les crêpes bretonnes ça tue des mouettes en plein vol !</p>"""
 	    return HttpResponse(text)
+
+Si vous utilisez Python 2, vous pourriez avoir besoin de préfixer les chaines contenant des accents avec `u` : `text = u"""..."""` pour forcer la chaine en Unicode.
 
 Ce code se divise en trois parties :
 
@@ -85,7 +86,7 @@ Par exemple, en reprenant la vue définie tout à l'heure, si nous souhaitons qu
 	    url(r'^accueil$', 'blog.views.home'),
 	)
 
-<div class="info">Mettre `r'^$'` comme URL équivaut à spécifier la racine du site web. Autrement dit, si nous avions utilisé cette URL à la place de `r'^accueil/$'`, la vue serait accessible depuis `http://www.crepes-bretonnes.com/`.</div>
+<div class="info">Mettre `r'^$'` comme URL équivaut à spécifier la racine du site web. Autrement dit, si nous avions utilisé cette URL à la place de `r'^accueil$'`, la vue serait accessible depuis `http://www.crepes-bretonnes.com/`.</div>
 
 Qu'est-ce que c'est, tous ces caractères bizarres dans l'URL ?
 
@@ -139,23 +140,23 @@ Ici, on a défini le préfixe d'URL `^blog/`. Cette portion va précéder toutes
 Nous avons scindé nos URL dans un fichier `urls.py` pour chaque application. Cependant, nous allons bientôt ajouter d'autres URL plus complexes dans notre `blog/urls.py`. Toutes ces URL seront routées vers des vues de `blog.views`. Au final, la variable `urlpatterns` de notre `blog/urls.py` risque de devenir longue :
 
 	urlpatterns = patterns('',
-	    url(r'^accueil/$', 'blog.views.home'),
-	    url(r'^truc/$', 'blog.views.truc'),
-	    url(r'^chose/$', 'blog.views.chose'),
-	    url(r'^machin/$', 'blog.views.machin'),
-	    url(r'^foo/$', 'blog.views.foo'),
-	    url(r'^bar/$', 'blog.views.bar'),
+	    url(r'^accueil$', 'blog.views.home'),
+	    url(r'^truc$', 'blog.views.truc'),
+	    url(r'^chose$', 'blog.views.chose'),
+	    url(r'^machin$', 'blog.views.machin'),
+	    url(r'^foo$', 'blog.views.foo'),
+	    url(r'^bar$', 'blog.views.bar'),
 	)
 
 Maintenant, imaginez que votre application « blog » change de nom, vous allez devoir réécrire tous les chemins vers vos vues ! Pour éviter de devoir modifier toutes les règles une à une, il est possible de spécifier un module par défaut qui contient toutes les vues. Pour ce faire, il faut utiliser le premier élément de notre tuple qui est resté une chaîne de caractères vide jusqu'à maintenant :
 
 	urlpatterns = patterns('blog.views',
-	    url(r'^accueil/$', 'home'),
-	    url(r'^truc/$', 'truc'),
-	    url(r'^chose/$', 'chose'),
-	    url(r'^machin/$', 'machin'),
-	    url(r'^foo/$', 'foo'),
-	    url(r'^bar/$', 'bar'),
+	    url(r'^accueil$', 'home'),
+	    url(r'^truc$', 'truc'),
+	    url(r'^chose$', 'chose'),
+	    url(r'^machin$', 'machin'),
+	    url(r'^foo$', 'foo'),
+	    url(r'^bar$', 'bar'),
 	)
 
 Tout est beaucoup plus simple et facilement éditable. Le module par défaut ici est `blog.views`, car toutes les vues viennent de ce fichier-là ; cela est désormais possible, car nous avons scindé notre `urls.py` principal en plusieurs `urls.py` propres à chaque application.
@@ -165,7 +166,7 @@ Finalement, notre `blog/urls.py` ressemble à ceci pour le moment :
 	from django.conf.urls import patterns, url
 
 	urlpatterns = patterns('blog.views',
-	    url(r'^accueil/$', 'home'),
+	    url(r'^accueil$', 'home'),
 	)
 
 Ne négligez pas cette solution, utilisez-la dès maintenant ! Il s'agit d'une excellente méthode pour structurer votre code, parmi tant d'autres que Django offre. Pensez aux éventuels développeurs qui pourraient maintenir votre projet après vous et qui n'ont pas envie de se retrouver avec une structure proche de l'anarchie.
@@ -178,9 +179,9 @@ Nous avons vu comment lier des URL à des vues et comment les organiser. Cependa
 Pour passer des arguments dans une URL, il suffit de capturer ces arguments directement depuis les expressions régulières. Par exemple, si nous souhaitons sur notre blog pouvoir accéder à un certain article via l'adresse `/blog/article/**` où `**` sera l'identifiant de l'article (un nombre unique), il suffit de fournir le routage suivant dans votre `urls.py` :
 
 	urlpatterns = patterns('blog.views',
-	    url(r'^accueil/$', 'home'),  # Accueil du blog
-	    url(r'^article/(\d+)/$', 'view_article'),  # Vue d'un article
-	    url(r'^articles/(\d{4})/(\d{2})/$', 'list_articles'),  # Vue des articles d'un mois précis
+	    url(r'^accueil$', 'home'),  # Accueil du blog
+	    url(r'^article/(\d+)$', 'view_article'),  # Vue d'un article
+	    url(r'^articles/(\d{4})/(\d{2})$', 'list_articles'),  # Vue des articles d'un mois précis
 	)
 
 Lorsque l'URL `/blog/article/42` est demandée, Django regarde le routage et exécute la fonction `view_article`, en passant en paramètre `42`. Autrement dit, Django appelle la vue de cette manière : `view_article(request, 42)`. Voici un exemple d'implémentation :
@@ -193,16 +194,16 @@ Lorsque l'URL `/blog/article/42` est demandée, Django regarde le routage et ex�
 	    text = "Vous avez demandé l'article #{0} !".format(id_article)
 	    return HttpResponse(text)
 
-Il faut cependant faire attention à l'ordre des paramètres dans l'URL afin qu'il corresponde à l'ordre des paramètres de la fonction. En effet, lorsque nous souhaitons obtenir la liste des articles d'un mois précis, selon la troisième règle que nous avons écrite, il faudrait accéder à l'URL suivante pour le mois de juin 2012 : `/blog/articles/2012/06`.
+Il faut cependant faire attention à l'ordre des paramètres dans l'URL afin qu'il corresponde à l'ordre des paramètres de la fonction. En effet, lorsque nous souhaitons obtenir la liste des articles d'un mois précis, selon la troisième règle que nous avons écrite, il faudrait accéder à l'URL suivante pour le mois de juin 2012 : `/blog/articles/2014/09`.
 
-Cependant, si nous souhaitons changer l'ordre des paramètres de l'URL pour afficher le mois, et ensuite l'année, celle-ci deviendrait `/blog/articles/06/2012`. Il faudra donc modifier l'ordre des paramètres dans la déclaration de la fonction en conséquence.
+Cependant, si nous souhaitons changer l'ordre des paramètres de l'URL pour afficher le mois, et ensuite l'année, celle-ci deviendrait `/blog/articles/09/2014`. Il faudra donc modifier l'ordre des paramètres dans la déclaration de la fonction en conséquence.
 
 Pour éviter cette lourdeur et un bon nombre d'erreurs, il est possible d'associer une variable de l'URL à un paramètre de la vue. Voici la démarche :
 
 	urlpatterns = patterns('blog.views',
-	    url(r'^home/$', 'home'),  # Accueil du blog
-	    url(r'^article/(?P<id_article>\d+)/$', 'view_article'),  # Vue d'un article
-	    url(r'^articles/(?P<year>\d{4})/(?P<month>\d{2})/$', 'list_articles'),  # Vue des articles d'un mois précis
+	    url(r'^home$', 'home'),  # Accueil du blog
+	    url(r'^article/(?P<id_article>\d+)$', 'view_article'),  # Vue d'un article
+	    url(r'^articles/(?P<year>\d{4})/(?P<month>\d{2})$', 'list_articles'),  # Vue des articles d'un mois précis
 	)
 
 Et la vue correspondante :
@@ -215,11 +216,11 @@ Et la vue correspondante :
 
 Dans cet exemple, mois et année (`month` et `year`) ne sont pas dans le même ordre entre le `urls.py` et le `views.py`, mais Django s'en occupe et règle l'ordre des arguments en fonction des noms qui ont été donnés dans le `urls.py`. En réalité, le framework va exécuter la fonction de cette manière :
 
-	list_articles(request, year=2012, month=6)
+	list_articles(request, year=2014, month=9)
 
 Il faut juste s'assurer que les noms de variables donnés dans le fichier `urls.py` coïncident avec les noms donnés dans la déclaration de la vue, sans quoi Python retournera une erreur.
 
-Pour terminer, sachez qu'il est toujours possible de passer des paramètres GET. Par exemple : `http://www.crepes-bretonnes.com/blog/article/1337?ref=twitter`. Django tentera de trouver le pattern correspondant en ne prenant en compte que ce qui est avant les paramètres GET, c'est-à-dire `/blog/article/1337/`. Les paramètres passés par la méthode GET sont bien évidemment récupérables, via le dictionnaire `request.GET`, ce que nous verrons plus tard.
+Pour terminer, sachez qu'il est toujours possible de passer des paramètres GET. Par exemple : `http://www.crepes-bretonnes.com/blog/article/1337?ref=twitter`. Django tentera de trouver le pattern correspondant en ne prenant en compte que ce qui est avant les paramètres GET, c'est-à-dire `/blog/article/1337`. Les paramètres passés par la méthode GET sont bien évidemment récupérables, via le dictionnaire `request.GET` dans la vue. Ici, `request.GET['ref']` retournerait `'twitter'`.
 
 Des réponses spéciales
 ----------------------
@@ -246,7 +247,7 @@ Si à l'appel de la page l'argument `id_article` est supérieur à 100, la page 
 
 ### Rediriger l'utilisateur
 
-Le second cas que nous allons aborder concerne les redirections. Il arrive que vous souhaitiez rediriger votre utilisateur vers une autre page lorsqu'une action vient de se dérouler, ou en cas d'erreur rencontrée. Par exemple, lorsqu'un utilisateur se connecte, il est souvent redirigé soit vers l'accueil, soit vers sa page d'origine. Une redirection est réalisable avec Django via la méthode `redirect` qui renvoie un objet `HttpResponseRedirect` (classe héritant de `HttpResponse`), qui redirigera l'utilisateur vers une autre URL. La méthode redirect peut prendre en paramètres plusieurs types d'arguments, dont notamment une URL brute (chaîne de caractères) ou le nom d'une vue.
+Le second cas que nous allons aborder concerne les redirections. Il arrive que vous souhaitiez rediriger votre utilisateur vers une autre page lorsqu'une action vient de se dérouler, ou en cas d'erreur rencontrée. Par exemple, lorsqu'un utilisateur se connecte, il est souvent redirigé soit vers l'accueil, soit vers sa page d'origine. Une redirection est réalisable avec Django via la méthode `redirect` qui renvoie un objet `HttpResponseRedirect` (classe héritant de `HttpResponse`), qui redirigera l'utilisateur vers une autre URL. La méthode `redirect` peut prendre en paramètres plusieurs types d'arguments, dont notamment une URL brute (chaîne de caractères) ou le nom d'une vue.
 
 Si par exemple vous voulez que votre vue, après une certaine opération, redirige vos visiteurs vers le site de Django, il faudrait procéder ainsi :
 
@@ -256,7 +257,7 @@ Si par exemple vous voulez que votre vue, après une certaine opération, rediri
 	    # Il veut des articles ? Soyons fourbe et redirigeons le vers djangoproject.com
 	    return redirect("https://www.djangoproject.com")
 
-N'oubliez pas qu'une URL valide pour accéder à cette vue serait `/blog/articles/2005/05`.
+N'oubliez pas qu'une URL valide pour accéder à cette vue serait `/blog/articles/2014/09`.
 
 Cependant, si vous souhaitez rediriger votre visiteur vers une autre page de votre site web, il est plus intéressant de privilégier l'autre méthode, qui permet de garder indépendante la configuration des URL et des vues. Nous devons donc passer en argument le nom de la vue vers laquelle nous voulons rediriger l'utilisateur, avec éventuellement des arguments destinés à celle-ci.
 
@@ -295,13 +296,13 @@ En réalité, la fonction redirect va construire l'URL vers la vue selon le rout
 
 Sachez qu'au lieu d'écrire à chaque fois tout le chemin d'une vue ou de l'importer, il est possible de lui assigner un nom plus court et plus facile à utiliser dans urls.py. Par exemple :
 
-	url(r'^article/(?P<id_article>\d+)/$', 'view_article', name="afficher_article"),
+	url(r'^article/(?P<id_article>\d+)$', 'view_article', name="afficher_article"),
 
 Notez le paramètre `name="afficher_article"` qui permet d'indiquer le nom de la vue. Avec ce routage, en plus de pouvoir passer directement la fonction ou le chemin vers celle-ci en argument, nous pouvons faire beaucoup plus court et procéder comme ceci :
 
 	return redirect('afficher_article', id_article=42)
 
-Pour terminer, sachez qu'il existe également une fonction qui permet de générer simplement l'URL et s'utilise de la même façon que `redirect` ; il s'agit de reverse (`from django.core.urlresolvers import reverse`). Cette fonction ne retournera pas un objet `HttpResponseRedirect`, mais simplement une chaîne de caractères contenant l'URL vers la vue selon les éventuels arguments donnés. Une variante de cette fonction sera utilisée dans les templates peu après pour générer des liens HTML vers les autres pages du site.
+Pour terminer, sachez qu'il existe également une fonction qui permet de générer simplement l'URL et s'utilise de la même façon que `redirect` ; il s'agit de `reverse` (`django.core.urlresolvers.reverse`). Cette fonction ne retournera pas un objet `HttpResponseRedirect`, mais simplement une chaîne de caractères contenant l'URL vers la vue selon les éventuels arguments donnés. Une variante de cette fonction sera utilisée dans les templates peu après pour générer des liens HTML vers les autres pages du site.
 
 
 En résumé
