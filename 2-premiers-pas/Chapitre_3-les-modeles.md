@@ -39,11 +39,12 @@ L'argument `verbose_name` en revanche est un argument commun à tous les champs 
 
 Il existe beaucoup d'autres champs disponibles, ceux-ci sont repris dans la documentation de Django. N'hésitez pas à la consulter en cas de doute ou question !
 
-Pour que Django crée la table associée au modèle, il suffit de lancer la commande `migrate` via l'utilitaire `manage.py`. La première utilisation de cette commande va créer la base de données initiale avec tous les modèles encodés (celui que vous venez de créer et ceux par défaut de Django) :
+Pour que Django crée la table associée au modèle, il faut lancer la commande `makemigrations` via l'utilitaire `manage.py`. Cette commande va déterminer quelles modifactions ont été apportées aux modèles et va détecter quels changements il faut opérer en conséquence sur la structure de la base de données. Ensuite, il faut utiliser la commande `migrate` qui va réaliser ces changements dans la base de données. Pour rajouter votre nouveau modèle, il faut donc lancer :
 
+    python manage.py makemigrations
     python manage.py migrate
 
-Par la suite, si vous ajoutez ou modifiez un modèle, vous devrez tout d'abord utiliser la commande `python manage.py makemigrations` qui va déterminer quelles modifications vous avez apportées à vos modèles, et ensuite réutiliser `migrate` qui va mettre à jour la base de données selon les modifications déterminées. 
+Par la suite, si vous ajoutez ou modifiez un modèle, vous devrez tout d'abord utiliser la commande `python manage.py makemigrations` qui va détecter les dernières modifications, et à nouveau réutiliser `migrate` qui va mettre à jour la base de données selon les modifications déterminées. 
 
 ![Aperçu des tables créées dans un outil de gestion de base de données](images/vue_bdd.png "Aperçu des tables créées dans un outil de gestion de base de données")
 
