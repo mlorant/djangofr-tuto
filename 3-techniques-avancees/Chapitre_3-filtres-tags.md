@@ -22,7 +22,7 @@ blog/
    __init__.py
    models.py
    templatetags/
-       __init__.py    # À ne pas oublier
+      __init__.py
       blog_extras.py
    views.py
 ```
@@ -44,10 +44,10 @@ L'application incluant les `templatetags` doit être incluse dans le fameux `INS
 Le nom `blog_extras` dans ce tag vient du nom de fichier que nous avons renseigné plus haut, à savoir `blog_extras.py`, sans l'extension `.py`.  
 Tous les dossiers `templatetags` de toutes les applications partagent le même espace de noms. Si vous utilisez des filtres et tags de plusieurs applications, veillez à ce que leur noms de fichiers soient différents, afin qu'il n'y ait pas de conflit !
 
-Sachez qu'il est possible de charger plusieurs module de filtres et tags par `{% load %}` : 
+Sachez qu'il est possible de charger plusieurs module de filtres et tags par `{% load %}`, qui comprend un nombre illimité d'arguments : 
 
 ```jinja
-{% load blog_extras static i18n %}  # le nombre d'argument est illimité, et tous les filtres/tags seront chargés
+{% load blog_extras static i18n %}=
 ```
 
 Nous pouvons désormais entrer dans le vif du sujet, à savoir la création de filtres et de tags !
@@ -80,8 +80,8 @@ Pour ce faire, il faut ajouter une fonction nommée `citation` dans `blog_extras
 ```python
 def citation(texte):   
     """
-    Affiche le texte passé en paramètre, encadré de guillemets français
-    doubles et d'espaces insécables
+    Affiche le texte passé en paramètre, encadré de guillemets 
+    français doubles et d'espaces insécables
     """
     return "«&nbsp;%s&nbsp;»" % texte
 ```
@@ -97,7 +97,6 @@ Ainsi, ces trois fonctions sont équivalentes :
 
 
 ```python
-#-*- coding:utf-8 -*-
 from django import template
 
 register = template.Library()
@@ -148,7 +147,6 @@ Cependant, un problème se pose avec cette méthode. En effet, si du HTML est pr
 Pour éviter cela, nous allons échapper les caractères spéciaux de notre argument de base. Cela peut être fait via la fonction `espace` du module `django.utils.html`. Au final, voici ce que nous obtenons :
 
 ```python
-#-*- coding:utf-8 -*-
 from django import template
 from django.utils.html import escape
 
@@ -442,22 +440,22 @@ def random(parser, token):
     # Séparation des paramètres contenus dans l'objet token. Le premier  
     # élément du token est toujours le nom du tag en cours
     try:
-           nom_tag, begin, end = token.split_contents()
+        nom_tag, begin, end = token.split_contents()
     except ValueError:
-           msg = u'Le tag %s doit prendre exactement deux arguments.' % token.split_contents()[0]
-           raise template.TemplateSyntaxError(msg)
+        msg = 'Le tag %s doit prendre exactement deux arguments.' % token.split_contents()[0]
+        raise template.TemplateSyntaxError(msg)
 
     # Nous vérifions ensuite que nos deux paramètres sont bien des entiers
     try:
-           begin, end = int(begin), int(end)
+        begin, end = int(begin), int(end)
     except ValueError:
-           msg = u'Les arguments du tag %s sont obligatoirement des entiers.' % nom_tag
-           raise template.TemplateSyntaxError(msg)
+        msg = 'Les arguments du tag %s sont obligatoirement des entiers.' % nom_tag
+        raise template.TemplateSyntaxError(msg)
 
     # Nous vérifions si le premier est inférieur au second
     if begin > end:
-           msg = u'L\'argument "begin" doit obligatoirement être inférieur à l\'argument "end" dans le tag %s.' % nom_tag
-           raise template.TemplateSyntaxError(msg)
+        msg = 'L\'argument "begin" doit obligatoirement être inférieur à l\'argument "end" dans le tag %s.' % nom_tag
+        raise template.TemplateSyntaxError(msg)
 
     return RandomNode(begin, end)
 ```
@@ -471,11 +469,11 @@ from random import randint
 
 class RandomNode(template.Node):
     def __init__(self, begin, end):
-           self.begin = begin
-           self.end = end
+        self.begin = begin
+        self.end = end
 
     def render(self, context):
-           return str(randint(self.begin, self.end))
+        return str(randint(self.begin, self.end))
 ```
 
 Comme pour la fonction de structuration, le code en lui-même n'est pas complexe. Nous nous contentons ici de nous souvenir des arguments, et une fois que la fonction `render` est appelée, nous générons un nombre aléatoire. Il ne faut cependant pas oublier de le _transposer en chaîne de caractères_, puisque Django fait après une simple concaténation des nœuds !
@@ -499,33 +497,33 @@ register = template.Library()
 def random(parser, token):
     """ Tag générant un nombre aléatoire, entre les bornes données en arguments """
     try:
-           nom_tag, begin, end = token.split_contents()
+        nom_tag, begin, end = token.split_contents()
     except ValueError:
-           msg = u'Le tag %s doit prendre exactement deux arguments.' % token.split_contents()[0]
-           raise template.TemplateSyntaxError(msg)
+        msg = 'Le tag %s doit prendre exactement deux arguments.' % token.split_contents()[0]
+        raise template.TemplateSyntaxError(msg)
 
     # Nous vérifions que nos deux paramètres sont bien des entiers
     try:
-           begin, end = int(begin), int(end)
+        begin, end = int(begin), int(end)
     except ValueError:
-           msg = u'Les arguments du tag %s sont obligatoirement des entiers.' % nom_tag
-           raise template.TemplateSyntaxError(msg)
+        msg = 'Les arguments du tag %s sont obligatoirement des entiers.' % nom_tag
+        raise template.TemplateSyntaxError(msg)
 
     # Nous vérifions si le premier est bien inférieur au second
     if begin > end:
-           msg = u'L\'argument "begin" doit obligatoirement être inférieur à l\'argument "end" dans le tag %s.' % nom_tag
-           raise template.TemplateSyntaxError(msg)
+        msg = 'L\'argument "begin" doit obligatoirement être inférieur à l\'argument "end" dans le tag %s.' % nom_tag
+        raise template.TemplateSyntaxError(msg)
 
     return RandomNode(begin, end)
 
 
 class RandomNode(template.Node):
     def __init__(self, begin, end):
-           self.begin = begin
-           self.end = end
+        self.begin = begin
+        self.end = end
 
     def render(self, context):
-           return str(randint(self.begin, self.end))
+        return str(randint(self.begin, self.end))
 ```
 
 Si vous oubliez d'enregistrer votre tag et que vous tentez tout de même de l'utiliser, vous obtiendrez l'erreur suivante : `Invalid block tag: 'random'`.
@@ -557,12 +555,12 @@ Tout d'abord, supprimons les tests sur le type et la comparaison entre `begin` e
 ```python
 @register.tag
 def random(parser, token):
-    """ Tag générant un nombre aléatoire, entre les bornes données en arguments """
+    """ Tag générant un nombre aléatoire entre les bornes en arguments """
     try:
-           nom_tag, begin, end = token.split_contents()
+        nom_tag, begin, end = token.split_contents()
     except ValueError:
-           msg = u'Le tag random doit prendre exactement deux arguments.'
-           raise template.TemplateSyntaxError(msg)
+        msg = 'Le tag random doit prendre exactement deux arguments.'
+        raise template.TemplateSyntaxError(msg)
 
     return RandomNode(begin, end)
 ```
@@ -574,33 +572,33 @@ from django.template.base import VariableDoesNotExist
 
 class RandomNode(template.Node):
     def __init__(self, begin, end):
-           self.begin = begin
-           self.end = end
+        self.begin = begin
+        self.end = end
 
     def render(self, context):
-           not_exist = False
+        not_exist = False
 
-           try:
-              begin = template.Variable(self.begin).resolve(context)
-              self.begin = int(begin)
-           except (VariableDoesNotExist, ValueError):
-              not_exist = self.begin
-           try:
-              end = template.Variable(self.end).resolve(context)
-              self.end = int(end)
-           except (VariableDoesNotExist, ValueError):
-              not_exist = self.end
+        try:
+            begin = template.Variable(self.begin).resolve(context)
+            self.begin = int(begin)
+        except (VariableDoesNotExist, ValueError):
+            not_exist = self.begin
+        try:
+            end = template.Variable(self.end).resolve(context)
+            self.end = int(end)
+        except (VariableDoesNotExist, ValueError):
+            not_exist = self.end
 
-           if not_exist:
-              msg = u'L\'argument "%s" n\'existe pas, ou n\'est pas un entier.' % not_exist
-              raise template.TemplateSyntaxError(msg)
+        if not_exist:
+            msg = 'L\'argument "%s" n\'existe pas, ou n\'est pas un entier.' % not_exist
+            raise template.TemplateSyntaxError(msg)
 
-           # Nous vérifions si le premier entier est bien inférieur au second
-           if self.begin > self.end:
-              msg = u'L\'argument "begin" doit obligatoirement être inférieur à l\'argument "end" dans le tag random.'
-              raise template.TemplateSyntaxError(msg)
+        # Nous vérifions si le premier entier est bien inférieur au second
+        if self.begin > self.end:
+            msg = 'L\'argument "begin" doit obligatoirement être inférieur à l\'argument "end" dans le tag random.'
+            raise template.TemplateSyntaxError(msg)
 
-           return str(randint(self.begin, self.end))
+        return str(randint(self.begin, self.end))
 ```
 
 Quelques explications s'imposent.
@@ -636,7 +634,7 @@ def random(begin, end):
     try:
        return randint(int(begin), int(end))
     except ValueError:
-       raise template.TemplateSyntaxError(u'Les arguments doivent nécessairement être des entiers')
+       raise template.TemplateSyntaxError('Les arguments doivent nécessairement être des entiers')
 ```
 
 Il est aussi possible d'accéder au contexte depuis ce genre de tags, en le précisant à son enregistrement :
