@@ -1,4 +1,4 @@
-Les vues génériques
+faq/Les vues génériques
 ===================
 
 Sur la plupart des sites web, il existe certains types de pages où créer une vue comme nous l'avons fait précédemment est lourd et presque inutile : pour une simple page HTML sans informations dynamiques par exemple, ou encore de simple listes d'objets sans traitements particuliers. Django est conçu pour n'avoir à écrire que le *minimum* (philosophie DRY), le framework inclut donc un système de vues génériques, qui évite au développeur de devoir écrire des fonctions simples et identiques, nous permettant de gagner du temps et des lignes de code.
@@ -42,11 +42,12 @@ from django.conf.urls import patterns, url, include
 from blog.views import FAQView  # N'oubliez pas d'importer la classe mère
 
 urlpatterns = patterns('',
-   (r'^faq/$', FAQView.as_view()),   # Nous demandons la vue correspondant à la classe FAQView
+   (r'^faq$', FAQView.as_view()),   # Nous demandons la vue correspondant à la classe FAQView
 )
 ```
 
-C'est tout ! Lorsqu'un visiteur accède à `/blog/faq/`, le contenu du fichier `templates/blog/faq.html` sera affiché. En réalité, la méthode `as_view` de `FAQView` retourne une vue (donc une fonction classique) qui se basera sur ses attributs pour déterminer son fonctionnement. Étant donné que nous avons indiqué un template à utiliser depuis l'attribut `template_name`, la classe l'utilisera pour générer une vue adaptée.
+C'est tout ! Lorsqu'un visiteur accède à `/blog/faq`, le contenu du template `blog/faq.html` sera affiché.   
+En réalité, la méthode `as_view` de `FAQView` retourne une vue (donc une fonction classique) qui se basera sur ses attributs pour déterminer son fonctionnement. Étant donné que nous avons indiqué un template à utiliser depuis l'attribut `template_name`, la classe l'utilisera pour générer une vue adaptée.
 
 Nous avons indiqué précédemment qu'il y avait deux méthodes pour utiliser les vues génériques. Le principe de la seconde est de directement instancier `TemplateView` dans le fichier `urls.py`, en lui passant en argument notre `template_name` :
 
@@ -55,7 +56,7 @@ from django.conf.urls import patterns, url, include
 from django.views.generic import TemplateView  # L'import a changé, attention !
 
 urlpatterns = patterns('',
-   url(r'^faq/', TemplateView.as_view(template_name='blog/faq.html')),
+   url(r'^faq', TemplateView.as_view(template_name='blog/faq.html')),
 )
 ```
 
@@ -123,7 +124,7 @@ urlpatterns = patterns('',
 )
 ```
 
-C'est l'occasion d'expliquer l'intérêt de l'argument `name`. Pour profiter au maximum des possibilités de Django, il est possible d'écrire les URL via la fonction `reverse`, et son tag associé dans les templates. L'utilisation du tag `url` se fera dès lors ainsi : {% url "blog_liste" %}. Cette fonctionnalité ne dépend pas des vues génériques, mais est inhérente au fonctionnement des URL en général. Vous pouvez donc également associer le paramètre `name` à une vue normale.
+C'est l'occasion d'expliquer l'intérêt de l'argument `name`. Pour profiter au maximum des possibilités de Django, il est possible d'écrire les URL via la fonction `reverse`, et son tag associé dans les templates. L'utilisation du tag `url` se fera dès lors ainsi : `{% url "blog_liste" %}`. Cette fonctionnalité ne dépend pas des vues génériques, mais est inhérente au fonctionnement des URL en général. Vous pouvez donc également associer le paramètre `name` à une vue normale.
 
 Ensuite, créons notre classe qui reprendra les mêmes attributs que notre `ListView` de tout à l'heure :
 
@@ -209,9 +210,14 @@ class ListeArticles(ListView):
        return Article.objects.filter(categorie__id=self.args[0])
 ```
 
-Tâchez tout de même de vous poser des limites, le désavantage ici est le suivant : la lecture de votre `urls.py` devient plus difficile, tout comme votre vue (imaginez si vous avez quatre arguments, à quoi correspond le deuxième ? le quatrième ?).
+Il est bien entendu possible de nommer les arguments également. Dans ce cas, il faut utiliser l'attribut kwargs au lieu de args. Ainsi, avec `r'categorie/(?P<id>\d+)'`, on obtient :
 
-Enfin, il est possible d'ajouter des éléments au contexte, c'est-à-dire les variables qui sont renvoyées au template. Par exemple, renvoyer l'ensemble des catégories, afin de faire une liste de liens vers celles-ci. Pour ce faire, nous allons ajouter au tableau `context` une clé `categories` qui contiendra notre liste :
+```python
+def get_queryset(self):
+    return Article.objects.filter(categorie__id=self.kwargs['id'])
+```
+
+Pour finir, il est possible d'ajouter des éléments au contexte, c'est-à-dire les variables qui sont renvoyées au template. Par exemple, renvoyer l'ensemble des catégories, afin de faire une liste de liens vers celles-ci. Pour ce faire, nous allons ajouter au tableau `context` une clé `categories` qui contiendra notre liste :
 
 ```python
 def get_context_data(self, **kwargs):
@@ -236,7 +242,8 @@ Il est facile d'afficher la liste des catégories dans notre template :
 Afficher un article via DetailView
 ----------------------------------
 
-Malgré tout cela, nous ne pouvons afficher que des listes, et non pas un objet précis. Heureusement, la plupart des principes vus précédemment avec les classes héritant de `ListView` sont applicables avec celles qui héritent de `DetailView`. Le but de `DetailView` est de renvoyer un seul objet d'un modèle, et non une liste. Pour cela, il va falloir passer un paramètre bien précis dans notre URL : `pk`, qui représentera *la clé primaire de l'objet à récupérer* :
+Malgré tout cela, nous ne pouvons afficher que des listes, et non pas un objet précis. Heureusement, la plupart des principes vus précédemment avec les classes héritant de `ListView` sont applicables avec celles qui héritent de `DetailView`.  
+Le but de `DetailView` est de renvoyer un seul objet d'un modèle, et non une liste. Pour cela, il va falloir passer un paramètre bien précis dans notre URL : `pk`, qui représentera *la clé primaire de l'objet à récupérer* :
 
 ```python
 from blog.views import ListeArticles, LireArticle
@@ -266,7 +273,7 @@ class LireArticle(DetailView):
 <div class="contenu">{{ article.contenu|linebreaks }}</div>
 ```
 
-Comme pour les `ListView`, il est possible de personnaliser la sélection avec get_queryset, afin de ne sélectionner l'article que s'il est public par exemple. Une autre spécificité utile lorsque nous affichons un objet, c'est d'avoir la possibilité de modifier un de ses attributs, par exemple son nombre de vues ou sa date de dernier accès. Pour faire cette opération, il est possible de surcharger la méthode `get_object`, qui renvoie l'objet à afficher :
+Comme pour les `ListView`, il est possible de personnaliser la sélection avec `get_queryset`, afin de ne sélectionner l'article que s'il est public par exemple. Une autre spécificité utile lorsque nous affichons un objet, c'est d'avoir la possibilité de modifier un de ses attributs, par exemple son nombre de vues ou sa date de dernier accès. Pour faire cette opération, il est possible de surcharger la méthode `get_object`, qui renvoie l'objet à afficher :
 
 ```python
 class LireArticle(DetailView):
@@ -313,11 +320,12 @@ class URLCreate(CreateView):
     success_url = reverse_lazy(liste)
 ```
 
-Comme tout à l'heure, l'attribut model permet de spécifier avec quel modèle nous travaillons, et template_name permet de spécifier le chemin vers le template (par défaut, le chemin est `<app>/<model>_create_form.html`, avec le nom du modèle tout en minuscules). La nouveauté ici réside dans les deux attributs suivants. Le premier, `form_class` permet de spécifier quel `ModelForm` utiliser pour *définir les champs disponibles à l'édition*, et tout ce qui est propriété du formulaire. Ici, nous allons réutiliser la classe que nous avions écrite précédemment étant donné qu'elle est suffisante pour l'exemple.
+Comme tout à l'heure, l'attribut `model` permet de spécifier avec quel modèle nous travaillons, et template_name permet de spécifier le chemin vers le template (par défaut, le chemin est `<app>/<model>_create_form.html`, avec le nom du modèle tout en minuscules).  
+La nouveauté ici réside dans les deux attributs suivants. Le premier, `form_class` permet de spécifier quel `ModelForm` utiliser pour *définir les champs disponibles à l'édition*, et tout ce qui est propriété du formulaire. Ici, nous allons réutiliser la classe que nous avions écrite précédemment étant donné qu'elle est suffisante pour l'exemple.
 
 Le dernier argument permet quant à lui de spécifier vers où rediriger l'utilisateur quand le formulaire est validé et enregistré. Nous avons utilisé ici `reverse_lazy`, qui permet d'utiliser la méthode `reverse()`, même si la configuration des URL n'a pas encore eu lieu (ce qui est le cas ici, puisque les vues génériques, faites par des classes sont interprétées en Python avant l'éxécution des `urls.py`).
 
-Le comportement de cette classe est similaire à notre ancienne vue `nouveau()` : s'il n'y a pas eu de requêtes de type *POST*, elle affiche le formulaire, selon les propriétés de `form_class`, et dans le template fourni. Une fois validé et si, et seulement si, le formulaire est considéré comme correct (`if form.is_valid()` dans notre ancienne vue), alors la méthode save() est appelée sur l'objet généré par le formulaire, puis redirige l'utilisateur vers l'URL `success_url`.
+Le comportement de cette classe est similaire à notre ancienne vue `nouveau()` : s'il n'y a pas eu de requêtes de type *POST*, elle affiche le formulaire, selon les propriétés de `form_class`, et dans le template fourni. Une fois validé et si, et seulement si, le formulaire est considéré comme correct (`if form.is_valid()` dans notre ancienne vue), alors la méthode `save()` est appelée sur l'objet généré par le formulaire, puis redirige l'utilisateur vers l'URL `success_url`.
 
 Notre template est déjà prêt pour cette vue, puisque l'objet `Form` renvoyé par cette vue générique est nommé `form`, en minuscules, comme nous l'avions fait avec l'ancienne méthode. Il nous faut juste éditer le fichier `urls.py` :
 
@@ -327,8 +335,8 @@ from views import URLCreate
 
 urlpatterns = patterns('mini_url.views',
     url(r'^$', 'liste', name='url_liste'),  # Une string vide indique la racine
-    url(r'^nouveau/$', URLCreate.as_view(), name='url_nouveau'),
-    url(r'^(?P<code>\w{6})/$', 'redirection', name='url_redirection'),  # (?P<code>\w{6}) capturera 6 caractères alphanumériques.
+    url(r'^nouveau$', URLCreate.as_view(), name='url_nouveau'),
+    url(r'^(?P<code>\w{6})$', 'redirection', name='url_redirection'),  # (?P<code>\w{6}) capturera 6 caractères alphanumériques.
 )
 ```
 
@@ -368,14 +376,15 @@ par
 Puisque nous utilisons cette page pour deux types d'actions, ayant deux URL distinctes, il suffit de se dire : « *Quand nous validons le formulaire, nous soumettons la requête à la même adresse que la page actuelle.* » Il ne reste plus qu'à modifier notre `urls.py`. Comme pour `DetailView`, il faut récupérer la clé primaire, appelée `pk`. Pas de changement profond, voici la ligne :
 
 ```python
-url(r'^edition/(?P<pk>\d)/$', URLUpdate.as_view(), name='url_update'),  # Pensez à importer URLUpdate en début de fichier
+# Pensez à importer URLUpdate en début de fichier
+url(r'^edition/(?P<pk>\d)$', URLUpdate.as_view(), name='url_update'),  
 ```
 
 Désormais, vous pouvez accéder à l'édition d'un objet `MiniURL`. Pour y accéder, cela se fait depuis les adresses suivantes : `/url/edition/1` pour le premier objet, `/url/edition/2` pour le deuxième, etc.
 
 Vous pouvez le constater sur la figure suivante : le résultat est satisfaisant. Bien évidemment, la vue est très minimaliste : n'importe qui peut éditer tous les liens, il n'y a pas de message de confirmation, etc. Par contre, il y a une gestion des objets qui n'existe pas en renvoyant une page d'erreur 404, des formulaires incorrects, etc. Tout cela est améliorable.
 
-# screenshot ici
+![Exemple de formulaire de mise à jour, reprenant le même template que l'ajout](images/UpdateView.png)
 
 #### Améliorons nos URL avec la méthode get_object()
 
@@ -383,7 +392,7 @@ Pour le moment, nous utilisons l'identifiant numérique, nommé `pk`, qui est la
 
 ![Ce que nous avons actuellement et ce que nous souhaitons avoir](images/url_pk_et_cle.png)
 
-Nous savons que chaque entrée possède un code unique donc il n'y a pas de soucis d'unicité. Surchargeons donc la méthode `get_object`, qui s'occupe de récupérer l'objet à mettre à jour.
+Nous savons que chaque entrée possède un code unique donc il n'y a pas de soucis d'unicité. Surchargeons alors la méthode `get_object`, qui s'occupe de récupérer l'objet à mettre à jour.
 
 ```python
 class URLUpdate(UpdateView):
@@ -397,10 +406,10 @@ class URLUpdate(UpdateView):
            return get_object_or_404(MiniURL, code=code)
 ```
 
-Nous utilisons encore une fois la fonction `get_object_or_404`, qui nous permet de renvoyer une page d'erreur si jamais le code demandé n'existe pas. Le code de l'adresse est accessible depuis le dictionnaire `self.kwargs`, qui contient les arguments nommés dans l'URL (précédemment, les arguments de `ListView` n'étaient pas nommés). Il faut donc changer un peu `urls.py` également, pour accepter l'argument `code`, qui prend des lettres et des chiffres :
+Nous utilisons encore une fois la fonction `get_object_or_404`, qui nous permet de renvoyer une page d'erreur si jamais le code demandé n'existe pas. Le code de l'adresse est accessible depuis le dictionnaire `self.kwargs`, qui contient les arguments nommés dans l'URL. Il faut donc changer un peu `urls.py` également, pour accepter l'argument `code`, qui prend des lettres et des chiffres :
 
 ```python
-url(r'^edition/(?P<code>\w{6})/$', URLUpdate.as_view(), name='url_update'),  # Le code est composé de 6 chiffres/lettres
+url(r'^edition/(?P<code>\w{6})$', URLUpdate.as_view(), name='url_update'),
 ```
 
 
@@ -442,7 +451,7 @@ Toujours pareil, la vue est associée à notre modèle, un template, et une URL 
 ```html
 <h1>Êtes-vous sûr de vouloir supprimer cette URL ?</h1>
 
-<p>{{ mini_url.code }} -> {{ mini_url.url }} (créée le {{ mini_url.date|date:"DATE_FORMAT" }})</p>
+<p>{{ mini_url.code }} -&gt; {{ mini_url.url }} (créée le {{ mini_url.date|date:"DATE_FORMAT" }})</p>
 
 <form method="post" action="">
    {% csrf_token %}  <!-- Nous prenons bien soin d'ajouter le csrf_token -->
@@ -454,7 +463,8 @@ Encore une fois, notre ligne en plus dans le fichier `urls.py` ressemble beaucou
 
 
 ```python
-url(r'^supprimer/(?P<code>\w{6})/$', URLDelete.as_view(), name='url_delete'),  # Ne pas oublier l'import de URLDelete !
+# Ne pas oublier l'import de URLDelete !
+url(r'^supprimer/(?P<code>\w{6})$', URLDelete.as_view(), name='url_delete'),  
 ```
 
 Afin de faciliter le tout, deux liens ont été ajoutés dans la liste définie dans le template `liste.html`, afin de pouvoir mettre à jour ou supprimer une URL rapidement : 
@@ -487,9 +497,19 @@ Même refrain : nous enregistrons, et nous pouvons tester grâce au lien ajouté
 
 Ce chapitre touche à sa fin. Néanmoins, nous n'avons même pas pu vous présenter toutes les spécificités des vues génériques ! Il existe en effet une multitude de classes de vues génériques, mais aussi d'attributs et méthodes non abordés ici. Si vous voulez avoir une petite idée de l'étendue du sujet, [le site ccbv.co.uk](http://ccbv.co.uk) présente une documentation exhaustive sur les vues génériques de Django. 
 
-Nous avons essayé de vous présenter les plus communes, celles qui vous seront probablement le plus utile, mais il est clairement impossible de tout présenter sans être indigeste, vu la taille de ce diagramme. Par exemple, nous avons décidé de ne pas couvrir toutes les classes qui permettent de faire des pages de tri par date ou d'archives. 
+Nous avons présenté les plus communes, celles qui vous seront probablement le plus utile, mais il est clairement impossible de tout présenter sans être indigeste. Par exemple, nous avons décidé de ne pas couvrir toutes les classes qui permettent de faire des pages de tri par date ou d'archives. 
 Si vous souhaitez en savoir plus, ces deux liens vous seront plus qu'utiles :
 
 
 - [Documentation officielle sur les vues génériques](https://docs.djangoproject.com/en/dev/ref/class-based-views/) ;
 - [Documentation non officielle mais très complète, listant les attributs et méthodes de chaque classe](http://ccbv.co.uk/).
+
+Ce qu'il faut retenir, c'est que Django vous propose un mécanisme générique pour les cas simples. Cependant, il ne faut pas en abuser, notamment si vous faites plus qu'afficher une simple liste ou un objet. 
+
+En résumé
+---------
+- Django fournit un ensemble de classes permettant d'éviter de réécrire plusieurs fois le même type de vue (affichage d'un template statique, liste d'objets, création d'objets…) ;
+- Les vues génériques peuvent être déclarées directement au sein de `urls.py` (cas le plus pratique pour les `TemplateView`) ou dans `views.py` ;
+- Chaque vue générique dispose d'un ensemble d'attributs permettant de définir ce que doit faire la vue : modèle concerné, template à afficher, gestion de la pagination, filtres… ;
+- Il est possible d'automatiser les formulaires d'ajout, de mise à jour et de suppression d'objets via des vues génériques ;
+- Le module `django.views.generic` regorge de classes (plusieurs dizaines en tout), n'hésitez pas à regarder si l'une d'entre elles fait ce que vous souhaitez avant de vous lancer.
