@@ -27,10 +27,13 @@ Vous devrez également créer un formulaire, plus spécialement un `ModelForm` b
 
 Nous vous fournissons la fonction qui permet de générer le code :
 
-    def generer(N):
-        caracteres = string.letters + string.digits
-        aleatoire = [random.choice(caracteres) for _ in xrange(N)]
-    
+    import random
+    import string
+
+    def generer(nb_caracteres):
+        caracteres = string.ascii_letters + string.digits
+        aleatoire = [random.choice(caracteres) for _ in range(nb_caracteres)]
+        
         return ''.join(aleatoire)
 
 En théorie, il faudrait vérifier que le code n'est pas déjà utilisé ou alors faire une méthode nous assurant l'absence de doublon. Dans un souci de simplicité et de pédagogie, nous allons sauter cette étape.
@@ -78,8 +81,8 @@ Votre `models.py` devrait ressembler à ceci :
         pseudo = models.CharField(max_length=255, blank=True, null=True)
         nb_acces = models.IntegerField(default=0, verbose_name="Nombre d'accès à l'URL")
     
-        def __unicode__(self):
-            return u"[{0}] {1}".format(self.code, self.url)
+        def __str__(self):
+            return "[{0}] {1}".format(self.code, self.url)
     
         def save(self, *args, **kwargs):
             if self.pk is None:
@@ -87,16 +90,15 @@ Votre `models.py` devrait ressembler à ceci :
     
             super(MiniURL, self).save(*args, **kwargs)
     
-        def generer(self, N):
+        def generer(nb_caracteres):
             caracteres = string.ascii_letters + string.digits
-            aleatoire = [random.choice(caracteres) for _ in range(N)]
-    
+            aleatoire = [random.choice(caracteres) for _ in range(nb_caracteres)]
+            
             self.code = ''.join(aleatoire)
-    
+
         class Meta:
             verbose_name = "Mini URL"
             verbose_name_plural = "Minis URL"
-
 
 Il y a plusieurs commentaires à faire dessus. Tout d'abord, nous avons surchargé la méthode `save()`, afin de générer automatiquement le code de notre URL. Nous avons pris le soin d'intégrer la méthode `generer()` au sein du modèle, mais il est aussi possible de la déclarer à l'extérieur et de faire `self.code = generer(6)`. Il ne faut surtout pas oublier la ligne qui appelle le `save()` parent, sinon lorsque vous validerez votre formulaire il ne se passera tout simplement rien !
 
@@ -235,5 +237,4 @@ En attendant, voici quelques idées d'améliorations pour ce TP :
 
  - Intégrer un style CSS et des images depuis des fichiers statiques via le tag `{% block %}` ;
  - Donner davantage de statistiques sur les redirections ;
- - Proposer la possibilité de rendre anonyme une redirection ;
- - Etc.
+ - Proposer la possibilité de rendre anonyme une redirection.

@@ -12,12 +12,14 @@ Un modèle s'écrit sous la forme d'une classe et représente une table dans la 
 Tout modèle Django se doit d'hériter de la classe mère `Model` incluse dans `django.db.models` (sinon il ne sera pas pris en compte par le framework). Par défaut, le fichier `models.py` généré automatiquement importe le module `models` de `django.db`. Voici un simple exemple de modèle représentant un article de blog :
 
     from django.db import models
+
     class Article(models.Model):
         titre = models.CharField(max_length=100)
         auteur = models.CharField(max_length=42)
         contenu = models.TextField(null=True)
         date = models.DateTimeField(auto_now_add=True, auto_now=False,  verbose_name="Date de parution")
-        def __unicode__(self):
+
+        def __str__(self):
             """ 
             Cette méthode que nous définirons dans tous les modèles
             nous permettra de reconnaître facilement les différents objets que nous
@@ -39,7 +41,7 @@ L'argument `verbose_name` en revanche est un argument commun à tous les champs 
 
 Il existe beaucoup d'autres champs disponibles, ceux-ci sont repris dans la documentation de Django. N'hésitez pas à la consulter en cas de doute ou question !
 
-Pour que Django crée la table associée au modèle, il faut lancer la commande `makemigrations` via l'utilitaire `manage.py`. Cette commande va déterminer quelles modifactions ont été apportées aux modèles et va détecter quels changements il faut opérer en conséquence sur la structure de la base de données. Ensuite, il faut utiliser la commande `migrate` qui va réaliser ces changements dans la base de données. Pour rajouter votre nouveau modèle, il faut donc lancer :
+Pour que Django crée la table associée au modèle, il faut lancer la commande `makemigrations` via l'utilitaire `manage.py`. Cette commande va déterminer quelles modifications ont été apportées aux modèles et va détecter quels changements il faut opérer en conséquence sur la structure de la base de données. Ensuite, il faut utiliser la commande `migrate` qui va réaliser ces changements dans la base de données. Pour rajouter votre nouveau modèle, il faut donc lancer :
 
     python manage.py makemigrations
     python manage.py migrate
@@ -141,7 +143,7 @@ Il est même possible d'aller plus loin, en filtrant par exemple les articles do
     >>> Article.objects.filter(titre__contains="crêpe")
     [<Article: Les crêpes>]
 
-Ces méthodes de recherche spéciales sont construites en prenant le champ concerné (ici titre), auquel nous ajoutons deux underscores « __ », suivis finalement de la méthode souhaitée. Ici, il s'agit donc de `titre__contains`, qui veut dire littéralement « prends tous les éléments dont le titre contient le mot passé en argument ».
+Ces méthodes de recherche spéciales sont construites en prenant le champ concerné (ici titre), auquel nous ajoutons deux underscores « \_\_ », suivis finalement de la méthode souhaitée. Ici, il s'agit donc de `titre__contains`, qui veut dire littéralement « prends tous les éléments dont le titre contient le mot passé en argument ».
 
 D'autres méthodes du genre existent, notamment la possibilité de prendre des valeurs du champ (strictement) inférieures ou (strictement) supérieures à l'argument passé, grâce à la méthode `lt` (« less than », plus petit que) et `gt` (« greater than », plus grand que) :
 
@@ -205,7 +207,8 @@ Pour traduire cette relation, nous allons d'abord devoir créer un autre modèle
 
     class Categorie(models.Model):
         nom = models.CharField(max_length=30)
-        def __unicode__(self):
+
+        def __str__(self):
             return self.nom
 
 Maintenant, créons la liaison depuis notre modèle `Article`, qu'il va falloir modifier en lui ajoutant un nouveau champ :
@@ -216,22 +219,23 @@ Maintenant, créons la liaison depuis notre modèle `Article`, qu'il va falloir 
         contenu = models.TextField(null=True)
         date = models.DateTimeField(auto_now_add=True, auto_now=False, verbose_name="Date de parution")
         categorie = models.ForeignKey('Categorie')
-        def __unicode__(self):
+
+        def __str__(self):
             return self.titre
 
 Nous avons donc ajouté un champ `ForeignKey`. En français, ce terme est traduit par « clé étrangère ». Il va enregistrer une clé, un identifiant propre à chaque catégorie enregistrée (il s'agit la plupart du temps d'un nombre), qui permettra donc de retrouver la catégorie associée.
 
 Utilisez `makemigrations` et `migrate` comme décrits précédemment pour mettre à jour votre base de données.
 
-La base de données étant prête, ouvrez à nouveau un shell via manage.py shell. Importons les modèles et créons une nouvelle catégorie :
+La base de données étant prête, ouvrez à nouveau un shell via `manage.py shell`. Importons les modèles et créons une nouvelle catégorie :
 
     >>> from blog.models import Categorie, Article
-    >>> cat = Categorie(nom=u"Crêpes")
+    >>> cat = Categorie(nom="Crêpes")
     >>> cat.save()
     >>> art = Article()
-    >>> art.titre=u"Les nouvelles crêpes"
+    >>> art.titre="Les nouvelles crêpes"
     >>> art.auteur="Maxime"
-    >>> art.contenu=u"On a fait de nouvelles crêpes avec du trop bon rhum"
+    >>> art.contenu="On a fait de nouvelles crêpes avec du trop bon rhum"
     >>> art.categorie = cat
     >>> art.save()
 
@@ -249,7 +253,7 @@ Le nom que prendra une relation en sens inverse est composé du nom du modèle s
 
 Point important : il est possible d'accéder aux attributs du modèle lié par une clé étrangère depuis un `filter`, `exclude`, `order_by` … Nous pourrions ici par exemple filtrer tous les articles dont le titre de la catégorie possède un certain mot :
 
-    >>> Article.objects.filter(categorie__nom__contains=u"crêpes")
+    >>> Article.objects.filter(categorie__nom__contains="crêpes")
     [<Article: Les nouvelles crêpes>]
 
 Accéder à un élément d'une clé étrangère se fait en ajoutant deux underscores « __ », comme avec les méthodes de recherche spécifiques, suivis du nom de l'attribut recherché. Comme montré dans l'exemple, nous pouvons encore ajouter une méthode spéciale de recherche sans aucun problème !
@@ -260,13 +264,15 @@ Un autre bref exemple :
 
     class Moteur(models.Model):
         nom = models.CharField(max_length=25)
-        def __unicode__(self):
+
+        def __str__(self):
             return self.nom
 
     class Voiture(models.Model):
         nom = models.CharField(max_length=25)
         moteur = models.OneToOneField(Moteur)
-        def __unicode__(self):
+
+        def __str__(self):
             return self.nom
 
 N'oubliez pas de mettre à jour votre base de données.
@@ -275,15 +281,15 @@ Nous avons deux objets, un moteur nommé « Vroum » et une voiture nommée « C
 
     >>> from blog.models import Moteur, Voiture
     >>> moteur = Moteur.objects.create(nom="Vroum") # create crée directement l'objet et l'enregistre
-    >>> voiture = Voiture.objects.create(nom=u"Crêpes-mobile", moteur=moteur)
+    >>> voiture = Voiture.objects.create(nom="Crêpes-mobile", moteur=moteur)
     >>> moteur.voiture
     <Voiture: Crêpes-mobile>
     >>> voiture.moteur
     <Moteur: Vroum>
 
-Ici, le `OneToOneField` a créé une relation en sens inverse qui ne va plus renvoyer un `QuerySet`, mais directement l'élément concerné (ce qui est logique, celui-ci étant unique). Cette relation inverse prendra simplement le nom du modèle, qui n'est donc plus suivi par _set.
+Ici, le `OneToOneField` a créé une relation en sens inverse qui ne va plus renvoyer un `QuerySet`, mais directement l'élément concerné (ce qui est logique, celui-ci étant unique). Cette relation inverse prendra simplement le nom du modèle, qui n'est donc plus suivi par `_set`.
 
-Sachez qu'il est possible de changer le nom de la variable créée par la relation inverse (précédemment article_set et moteur). Pour ce faire, il faut utiliser l'argument `related_name` du `ForeignKey` ou `OneToOneField` et lui passer une chaîne de caractères désignant le nouveau nom de la variable (à condition que cette chaîne représente bien un nom de variable valide !). Cette solution est notamment utilisée en cas de conflit entre noms de variables. Accessoirement, il est même possible de désactiver la relation inverse en donnant `related_name='+'`.
+Sachez qu'il est possible de changer le nom de la variable créée par la relation inverse (précédemment `article_set` et moteur). Pour ce faire, il faut utiliser l'argument `related_name` du `ForeignKey` ou `OneToOneField` et lui passer une chaîne de caractères désignant le nouveau nom de la variable (à condition que cette chaîne représente bien un nom de variable valide !). Cette solution est notamment utilisée en cas de conflit entre noms de variables. Accessoirement, il est même possible de désactiver la relation inverse en donnant `related_name='+'`.
 
 Finalement, dernier type de liaison, le plus complexe : le `ManyToManyField` (traduit littéralement, « plusieurs-à-plusieurs »). Reprenons un autre exemple simple : nous construisons un comparateur de prix pour les ingrédients nécessaires à la réalisation de crêpes. Plusieurs vendeurs proposent plusieurs produits, parfois identiques, à des prix différents.
 
@@ -291,21 +297,23 @@ Il nous faudra trois modèles :
 
     class Produit(models.Model):
         nom = models.CharField(max_length=30)
-        def __unicode__(self):
+
+        def __str__(self):
             return self.nom
 
     class Vendeur(models.Model):
         nom = models.CharField(max_length=30)
         produits = models.ManyToManyField(Produit, through='Offre')
         
-        def __unicode__(self):
+        def __str__(self):
             return self.nom
 
     class Offre(models.Model):
         prix = models.IntegerField()
         produit = models.ForeignKey(Produit)
         vendeur = models.ForeignKey(Vendeur)
-        def __unicode__(self):
+
+        def __str__(self):
             return "{0} vendu par {1}".format(self.produit, self.vendeur)
 
 Explications ! Les modèles `Produit` et `Vendeur` sont classiques, à l'exception du fait que nous avons utilisé un `ManyToManyField` dans `Vendeur`, au lieu d'une `ForeignKey` ou de `OneToOneField` comme précédemment. La nouveauté, en revanche, est bien le troisième modèle : `Offre`. C'est celui-ci qui fait le lien entre `Produit` et `Vendeur` et permet d'ajouter des informations supplémentaires sur la liaison (ici le prix, caractérisé par un `IntegerField` qui enregistre un nombre).
@@ -332,7 +340,7 @@ Pour supprimer une liaison entre deux objets, deux méthodes se présentent enco
 
     vendeur.produits.remove(p1) # Nous avons supprimé p1, il ne reste plus que p2 qui est lié au vendeur
 
-Ensuite, pour accéder aux objets du modèle source (possédant la déclaration du ManyToManyField, ici Vendeur) associés au modèle destinataire (ici Produit), rien de plus simple, nous obtenons à nouveau un QuerySet :
+Ensuite, pour accéder aux objets du modèle source (possédant la déclaration du `ManyToManyField`, ici `Vendeur`) associés au modèle destinataire (ici `Produit`), rien de plus simple, nous obtenons à nouveau un `QuerySet` :
 
     >>> vendeur.produits.all()
     [<Produit: Lait>, <Produit: Farine>]
@@ -397,8 +405,9 @@ Chaque table contient les attributs définis dans le modèle, mais également un
 
     def accueil(request):
         """ Afficher tous les articles de notre blog """
-        articles = Article.objects.all() # Nous sélectionnons tous nos      articles
-        return render(request, 'blog/accueil.html',         {'derniers_articles':articles})
+        articles = Article.objects.all() # Nous sélectionnons tous nos  articles
+        return render(request, 'blog/accueil.html', {'derniers_articles':articles})
+
     def lire(request, id):
         """ Afficher un article complet """
         pass # Le code de cette fonction est donné un peu plus loin.
@@ -417,7 +426,7 @@ Chaque table contient les attributs définis dans le modèle, mais également un
         <div class="article">
             <h3>{{ article.titre }}</h3>
             <p>{{ article.contenu|truncatewords_html:80 }}</p>
-            <p><a href="{% url "blog.views.lire" article.id %}">Lire la     suite</a>
+            <p><a href="{% url "blog.views.lire" article.id %}">Lire la suite</a>
         </div>
     {% empty %} 
         <p>Aucun article.</p>
@@ -442,11 +451,12 @@ C'est assez verbeux, or les développeurs Django sont très friands de raccourci
 Il faut ajouter l'import `get_object_or_404`, attention !
 
     from django.shortcuts import render, get_object_or_404
+
     def lire(request, id):
         article = get_object_or_404(Article, id=id)
         return render(request, 'blog/lire.html', {'article':article})
 
-Voici le template lire.html associé à la vue :
+Voici le template `lire.html` associé à la vue :
 
     <h1>{{ article.titre }} <span class="small">dans    {{ article.categorie.nom }}</span></h1>
     <p class="infos">Rédigé par {{ article.auteur }}, le {{ article.date|date:"DATE_FORMAT" }}</p>
@@ -470,7 +480,8 @@ Nous allons intégrer la même chose à notre système de blog. Pour cela, il ex
         auteur = models.CharField(max_length=42)
         contenu = models.TextField(null=True)
         date = models.DateTimeField(auto_now_add=True, auto_now=False, verbose_name="Date de parution")
-        def __unicode__(self):
+
+        def __str__(self):
             return self.titre
     
 N'oubliez pas de mettre à jour la structure de votre table, comme nous l'avons déjà expliqué précédemment, et de créer une nouvelle entrée à partir de `manage.py shell` !
