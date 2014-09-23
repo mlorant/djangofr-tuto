@@ -1,7 +1,7 @@
 Les messages
 ============
 
-Il est souvent utile d'envoyer des notifications au visiteur, pour par exemple lui confirmer qu'une action s'est bien réalisée, ou au contraire lui indiquer une erreur. Django propose un petit système de notification permettant d'enregistrer une liste de messages à afficher à la prochaine page de l'utilisateur. Nous le présenterons dans ce chapitre.
+Il est souvent utile d'envoyer des notifications au visiteur, pour par exemple lui confirmer qu'une action s'est bien réalisée, ou au contraire lui indiquer une erreur. Django propose un système de notification permettant d'enregistrer une liste de messages à afficher à la prochaine page de l'utilisateur. Nous le présenterons dans ce chapitre.
 
 Envoyons des messages à nos utilisateurs 
 ----------------------------------------
@@ -31,7 +31,7 @@ from django.contrib import messages
 messages.add_message(request, messages.INFO, 'Bonjour visiteur !')
 ```
 
-Ici, nous avons envoyé un message, avec le niveau `INFO`, au visiteur, contenant « *Bonjour visiteur !* ». Il est important de ne pas oublier le premier argument : `request`, l'objet `HttpRequest` donné à la vue. Sans cela, Django ne saura pas à où stocker le message.
+Ici, nous avons envoyé un message, avec le niveau `INFO`, au visiteur, contenant « *Bonjour visiteur !* ». Il est important de ne pas oublier le premier argument : `request`, l'objet `HttpRequest` donné à la vue. Sans cela, Django ne saura pas où stocker le message.
 
 Il existe également quelques raccourcis pour les niveaux par défaut, plus rapide à écrire :
 
@@ -43,7 +43,7 @@ messages.warning(request, u'Votre compte expire dans 3 jours.')
 messages.error(request, u'Cette image n\'existe plus.')
 ```
 
-Maintenant que vous savez envoyer des messages, il ne reste plus qu'à les afficher. Pour ce faire, Django se charge de la majeure partie du travail : une variable `messages` est inclus dans le contexte grâce *context_processors* installé. Tout ce qu'il reste à faire, c'est de choisir où afficher les notifications dans le template. Les variables contenant celles-ci sont automatiquement incluses grâce à un processeur de contexte. Voici une ébauche de code de template pour afficher les messages au visiteur :
+Maintenant que vous savez envoyer des messages, il ne reste plus qu'à les afficher. Pour ce faire, Django se charge de la majeure partie du travail : une variable `messages` est inclus dans le contexte grâce *context_processors* installé. Tout ce qu'il reste à faire, c'est de choisir où afficher les notifications dans le template. Voici une ébauche de code de template pour afficher les messages au visiteur :
 
 ```jinja
 {% if messages %}
@@ -92,7 +92,7 @@ Il est également possible d'ajouter des tags à un message, pour ajouter des cl
 messages.add_message(request, CRITICAL, 'Une erreur critique est survenue.', extra_tags="fail")
 ```
 
-Pour terminer, sachez que vous pouvez également limiter l'affichage des messages à un certain niveau (égal ou supérieur). Cela peut se faire de deux manières différentes. Soit depuis le `settings.py` en mettant `MESSAGE_LEVEL` au niveau minimum des messages à afficher (par exemple 25 pour ne pas montrer les messages `DEBUG` et `INFO`), soit en faisant cette requête dans la vue :
+Sachez que vous pouvez également limiter l'affichage des messages à un certain niveau (égal ou supérieur). Cela peut se faire de deux manières différentes. Soit depuis le `settings.py` en mettant `MESSAGE_LEVEL` au niveau minimum des messages à afficher (par exemple 25 pour ne pas montrer les messages `DEBUG` et `INFO`), soit en faisant cette requête dans la vue :
 
 ```python
 messages.set_level(request, messages.DEBUG)
