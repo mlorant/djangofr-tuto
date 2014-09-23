@@ -92,7 +92,7 @@ CACHES = {
 }
 ```
 
-La clé `'LOCATION'` indique la combinaison adresse IP/port depuis laquelle Memcached est accessible. Nous avons adapté la valeur de la variable à la commande indiquée ci-dessus.
+La clé `'LOCATION'` indique la combinaison adresse `IP:port` depuis laquelle Memcached est accessible. Nous avons adapté la valeur de la variable à la commande indiquée ci-dessus.
 
 ### Pour le développement
 
@@ -134,7 +134,7 @@ def lire_article(request, id):
 ```
 
 Le paramètre du décorateur correspond à la durée après laquelle le rendu dans le cache aura expiré. Cette durée est exprimée en secondes. Autrement dit, ici, après 15 fois 60 secondes — donc 15 minutes — la donnée sera supprimée du cache et Django devra régénérer la page, puis remettre la nouvelle version dans le cache. Grâce à cet argument, vous êtes assurés que le cache restera à jour automatiquement.  
-Bien évidemment, chaque URL aura sa propre mise en cache. En effet, pour `lire_article`, il est normal que `/article/42/` et `/article/1337/` ne partagent pas le même résultat en cache (étant donné qu'ils n'affichent pas le même article). Il est également possible de spécifier une mise en cache directement depuis le `urls.py`. Ainsi, la mise en cache de vues génériques est également possible :
+Bien évidemment, chaque URL aura sa propre mise en cache. En effet, pour `lire_article`, il est normal que `/article/42` et `/article/1337` ne partagent pas le même résultat en cache (étant donné qu'ils n'affichent pas le même article). Il est également possible de spécifier une mise en cache directement depuis le `urls.py`. Ainsi, la mise en cache de vues génériques est également possible :
 
 ```python
 from django.views.decorators.cache import cache_page
@@ -165,7 +165,7 @@ Sachez que vous pouvez également enregistrer plusieurs copies en cache d'une m�
 
 ```jinja
 {% load cache %}
-{% cache 500 carrousel request.user.username %}
+{% cache 500 carrousel user.username %}
     /* mon carrousel adapté à l'utilisateur actuel */
 {% endcache %}
 ```
