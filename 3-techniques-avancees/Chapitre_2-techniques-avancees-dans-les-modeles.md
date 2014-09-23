@@ -13,8 +13,9 @@ Avant tout, prenons un modèle simple pour illustrer nos exemples :
     class Eleve(models.Model):
         nom = models.CharField(max_length=31)
         moyenne = models.IntegerField(default=10)
-        def __unicode__(self):
-            return u"Élève {0} ({1}/20 de moyenne)".format(self.nom, self.moyenne)
+
+        def __str__(self):
+            return "Élève {0} ({1}/20 de moyenne)".format(self.nom, self.moyenne)
 
 Ajoutons quelques élèves dans la console interactive (pour rappel : `manage.py shell`) :
 
@@ -74,7 +75,7 @@ et les incorporer dans une requête ainsi (avec une clause « OU ») :
     Eleve.objects.filter(reduce(operator.or_, objets_q))
     [<Eleve: Élève Mathieu (18/20 de moyenne)>, <Eleve: Élève Thibault (15/20 de moyenne)>]
 
-reduce est une fonction par défaut de Python qui permet d'appliquer une fonction à plusieurs valeurs successivement. Petit exemple pour comprendre plus facilement :
+`reduce` est une fonction par défaut de Python qui permet d'appliquer une fonction à plusieurs valeurs successivement. Petit exemple pour comprendre plus facilement :
 
 `reduce(lambda x, y: x+y, [1, 2, 3, 4, 5])` va calculer ((((1+2)+3)+4)+5), donc 15. La même chose sera faite ici, mais avec l'opérateur « OU » qui est accessible depuis `operator.or_`. En réalité, Python va donc faire :
 
@@ -132,7 +133,8 @@ Pour ce faire, ajoutons un autre modèle :
     class Cours(models.Model):
         nom = models.CharField(max_length=31)
         eleves = models.ManyToManyField(Eleve)
-        def __unicode__(self):
+
+        def __str__(self):
             return self.nom
 
 Créons deux cours :
@@ -192,6 +194,7 @@ Pour illustrer cette méthode, prenons un exemple simple :
         titre = models.CharField(max_length=255)
         date_ajout = models.DateTimeField(auto_now_add=True, verbose_name="Date d'ajout du document")
         auteur = models.CharField(max_length=255, null=True, blank=True)
+
         class Meta:
             abstract = True
     
@@ -214,7 +217,8 @@ Prenons un exemple simple :
     class Lieu(models.Model):
         nom = models.CharField(max_length=50)
         adresse = models.CharField(max_length=100)
-        def __unicode__(self):
+
+        def __str__(self):
             return self.nom
     
     class Restaurant(Lieu):
@@ -272,8 +276,9 @@ Petit exemple de modèle proxy qui hérite du modèle `Restaurant` que nous avon
         class Meta:
             proxy = True # Nous spécifions qu'il s'agit d'un proxy
             ordering = ["nom"] # Nous changeons le tri par défaut, tous les QuerySet seront triés selon le nom de chaque objet
+
         def crepes(self):
-            if u"crêpe" in self.menu: #Il y a des crêpes dans le menu
+            if "crêpe" in self.menu: #Il y a des crêpes dans le menu
                 return True
             return False
 
@@ -335,7 +340,7 @@ Voici une ébauche de ce modèle `Commentaire` avec une relation générique :
         object_id = models.PositiveIntegerField()
         content_object = generic.GenericForeignKey('content_type', 'object_id')
 
-        def __unicode__(self):
+        def __str__(self):
             return "Commentaire de {0} sur {1}".format(self.auteur, self.content_object)
 
 La relation générique est ici l'attribut `content_object`, avec le champ `GenericForeignKey`. Cependant, vous avez sûrement remarqué l'existence de deux autres champs : `content_type` et `object_id`. À quoi servent-ils ?
@@ -364,11 +369,13 @@ Avant de terminer, sachez qu'il est également possible d'ajouter une relation g
 Si nous reprenons le modèle `Eleve`, cette fois modifié :
 
     from django.contrib.contenttypes import generic
+
     class Eleve(models.Model):
         nom = models.CharField(max_length=31)
         moyenne = models.IntegerField(default=10)
         commentaires = models.GenericRelation(Commentaire)
-        def __unicode__(self):
+
+        def __str__(self):
             return u"Élève {0} ({1}/20 de moyenne)".format(self.nom, self.moyenne)
 
 Dès lors, le champ commentaires contient tous les commentaires adressés à l'élève :
