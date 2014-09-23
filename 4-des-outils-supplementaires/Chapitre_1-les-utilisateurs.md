@@ -21,8 +21,8 @@ Tout le système utilisateur tourne autour du modèle `django.contrib.auth.model
  - `email` : adresse e-mail ;
  - `password` : un *hash* du mot de passe. Django n'enregistre pas les mots de passe en clair dans la base de données, nous y reviendrons plus tard ;
  - `is_staff` : booléen, permet d'indiquer si l'utilisateur a accès à l'administration de Django ;
- - `is_active` : booléen, par défaut mis à True. Si mis à False, l'utilisateur est considéré comme désactivé et ne peut plus se connecter. Au lieu de supprimer un utilisateur, il est conseillé de le désactiver afin de ne pas devoir supprimer d'éventuels modèles liés à l'utilisateur (avec une ForeignKey par exemple) ;
- - `is_superuser` : booléen, si mis à True, l'utilisateur obtient toutes les permissions (nous y reviendrons plus tard également) ;
+ - `is_active` : booléen, par défaut mis à `True`. Si mis à `False`, l'utilisateur est considéré comme désactivé et ne peut plus se connecter. Au lieu de supprimer un utilisateur, il est conseillé de le désactiver afin de ne pas devoir supprimer d'éventuels modèles liés à l'utilisateur (avec une `ForeignKey` par exemple) ;
+ - `is_superuser` : booléen, si mis à `True`, l'utilisateur obtient toutes les permissions (nous y reviendrons plus tard également) ;
  - `last_login` : datetime, représente la date et l'heure à laquelle l'utilisateur s'est connecté la dernière fois ;
  - `date_joined` : datetime, représente la date et l'heure à laquelle l'utilisateur s'est inscrit ;
  - `user_permissions` : une relation `ManyToMany` vers les permissions (introduites par la suite) ;
@@ -64,14 +64,14 @@ Quelle est la bonne nouvelle dans tout ça ? Django le fait automatiquement ! En
 
 Le résultat est plutôt inattendu. Tous les mots de passe sont enregistrés selon cette disposition : `algorithme$iterations$sel$empreinte`.
 
- - **Algorithme** : le nom de l'algorithme de la fonction de hachage utilisée pour le mot de passe (ici *pbkdf2_sha256*, la fonction de hachage par défaut de Django) ;
- - **Itérations** : le nombre de fois que l'algorithme va être exécuté afin de ralentir le processus. Si le chiffrement est plus lent, alors cela ralenti le nombre d'essais possible à la seconde via le bruteforce. Rassurez-vous, cette lenteur est invisible à l'oeil nu sur un essai. 
+ - **Algorithme** : le nom de l'algorithme de la fonction de hachage utilisée pour le mot de passe (ici *pbkdf2_sha256*, la fonction de hachage par défaut de Django). Il est possible de changer d'algorithme par défaut, tout en gardant la validité des anciens mot de passe, de cette manière ;
+ - **Itérations** : le nombre de fois que l'algorithme va être exécuté afin de ralentir le processus. Si le chiffrement est plus lent, alors cela ralenti le nombre d'essais possible à la seconde via le bruteforce. Rassurez-vous, cette lenteur est invisible à l'oeil nu sur un essai ; 
  - **Sel** : le sel est une chaîne de caractères insérée dans le mot de passe originel pour rendre son déchiffrage plus difficile (ici *cRu9mKvGzMzW*). Django s'en charge tout seul, inutile de s'y attarder ;
- - **Empreinte** : l'empreinte finale, résultat de la combinaison du mot de passe originel et du sel par la fonction de hachage. Elle représente la majeure partie de `user.password`.
+ - **Empreinte** : l'empreinte finale, résultat de la combinaison du mot de passe originel et du sel par la fonction de hachage après le nombre d'itérations précisé. Elle représente la majeure partie de `user.password`.
 
 Maintenant que vous savez que le champ `password` ne s'utilise pas comme un champ classique, comment l'utiliser ? Django fournit quatre méthodes au modèle User pour la gestion des mots de passe :
 
- - `set_password(mot_de_passe)` : permet de modifier le mot de passe de l'utilisateur par celui donné en argument. Django va hacher ce dernier, puis l'enregistrer dans la base de données, comme vu précédemment. Cette méthode ne sauvegarde pas l'entrée dans la base de données, il faut faire un `.save()` par la suite.
+ - `set_password(mot_de_passe)` : permet de modifier le mot de passe de l'utilisateur par celui donné en argument. Django va hacher ce dernier comme vu précédemment. Cette méthode ne sauvegarde pas l'entrée dans la base de données, il faut faire un `.save()` par la suite.
  - `check_password(mot_de_passe)` : vérifie si le mot de passe donné en argument correspond bien à l'empreinte enregistrée dans la base de données. Retourne `True` si les deux mots de passe correspondent, sinon `False`.
  - `set_unusable_password()` : permet d'indiquer que l'utilisateur n'a pas de mot de passe défini. Dans ce cas, `check_password` retournera toujours `False`.
  - `has_usable_password()` : retourne `True` si le compte utilisateur a un mot de passe valide, `False` si `set_unusable_password` a été utilisé.
@@ -96,19 +96,19 @@ Pour terminer ce sous-chapitre, abordons l'extension du modèle `User`. Nous avo
 
 La solution est d'étendre le modèle avec un autre modèle contenant tous les champs que vous souhaitez ajouter à votre modèle utilisateur. Une fois ce modèle spécifié, il faut le lier au modèle `User` en ajoutant un `OneToOneField` vers ce dernier.
 
-Imaginons que nous souhaitions donner la possibilité à un utilisateur d'avoir un avatar, une signature pour ses messages, un lien vers son site web et de pouvoir s'inscrire à la newsletter de notre site. Notre modèle ressemblerait à ceci, dans `blog/models.py` :
+Imaginons que nous souhaitions donner la possibilité à un utilisateur d'avoir un avatar, une signature pour ses messages, un lien vers son site web et de pouvoir s'inscrire à la newsletter de notre site. Notre modèle ressemblerait à ceci :
 
 ```python
 from django.contrib.auth.models import User
 
 class Profil(models.Model):
     user = models.OneToOneField(User)  # La liaison OneToOne vers le modèle User
-    site_web = models.URLField(null=True, blank=True)
+    site_web = models.URLField(blank=True)
     avatar = models.ImageField(null=True, blank=True, upload_to="avatars/")
-    signature = models.TextField(null=True, blank=True)
+    signature = models.TextField(blank=True)
     inscrit_newsletter = models.BooleanField(default=False)
 
-    def __unicode__(self):
+    def __str__(self):
         return "Profil de {0}".format(self.user.username)
 ```
 
@@ -148,7 +148,7 @@ Nous avons désormais des utilisateurs, ils n'ont plus qu'à se connecter ! Pour
  - Un template pour afficher ce formulaire ;
  - Une vue pour récupérer les données, les vérifier, et connecter l'utilisateur.
 
-Commençons par le formulaire. Il ne nous faut que deux choses : le nom d'utilisateur et le mot de passe. Autrement dit, le formulaire est très simple. Nous le plaçons dans `blog/forms.py` :
+Commençons par le formulaire. Il ne nous faut que deux choses : le nom d'utilisateur et le mot de passe. Autrement dit, le formulaire est très simple. Nous le plaçons dans un fichier `forms.py` :
 
 ```python
 class ConnexionForm(forms.Form):
@@ -171,14 +171,15 @@ Passons au template :
 Vous êtes connecté, {{ user.username }} !
 {% else %}
 <form method="post" action=".">
-       {% csrf_token %}
-       {{ form.as_p }}
-    <input type="submit"/>
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Se connecter" />
 </form>
 {% endif %}
 ```
 
-La nouveauté ici est la variable `user`, qui contient l'instance `User` de l'utilisateur s'il est connecté, ou une instance de la classe `AnonymousUser`. La classe `AnonymousUser` est utilisée pour indiquer que le visiteur n'est pas un utilisateur connecté. `User` et `AnonymousUser` partagent certaines méthodes comme `is_authenticated`, qui permet de définir si le visiteur est connecté ou non. Une instance `User` retournera toujours `True`, tandis qu'une instance `AnonymousUser` retournera toujours `False`. La variable `user` dans les templates est ajoutée par un processeur de contexte inclus par défaut.
+La nouveauté ici est la variable `user`, qui contient l'instance `User` de l'utilisateur s'il est connecté, ou une instance de la classe `AnonymousUser`. La classe `AnonymousUser` est utilisée pour indiquer que le visiteur n'est pas un utilisateur connecté. `User` et `AnonymousUser` partagent certaines méthodes comme `is_authenticated`, qui permet de définir si le visiteur est connecté ou non. Une instance `User` retournera toujours `True`, tandis qu'une instance `AnonymousUser` retournera toujours `False`.  
+La variable `user` dans les templates est ajoutée par un processeur de contexte inclus par défaut. Le même objet est disponible via `request.user` dans les vues.
 
 Notez l'affichage du message d'erreur si la combinaison utilisateur/mot de passe est incorrecte.
 
@@ -208,8 +209,8 @@ def connexion(request):
     if request.method == "POST":
         form = ConnexionForm(request.POST)
         if form.is_valid():
-            username = form.cleaned_data["username"]  # Nous récupérons le nom d'utilisateur
-            password = form.cleaned_data["password"]  # … et le mot de passe
+            username = form.cleaned_data["username"]
+            password = form.cleaned_data["password"]
             user = authenticate(username=username, password=password)  # Nous vérifions si les données sont correctes
             if user:  # Si l'objet renvoyé n'est pas None
                 login(request, user)  # nous connectons l'utilisateur
@@ -221,13 +222,13 @@ def connexion(request):
     return render(request, 'connexion.html', locals())
 ```
 
-Et finalement la directive de routage dans `crepes_bretonnes/urls.py` :
+Et finalement la directive de routage :
 
 ```python
-url(r'^connexion/$', 'blog.views.connexion', name='connexion'),
+url(r'^connexion$', 'auth.views.connexion', name='connexion'),
 ```
 
-Vous pouvez désormais essayer de vous connecter depuis l'adresse `/connexion/`. Vous devrez soit créer un compte manuellement dans la console si cela n'a pas été fait auparavant grâce à la commande `manage.py createsuperuser`, soit renseigner le nom d'utilisateur et le mot de passe du compte super-utilisateur que vous avez créé lors de votre tout premier `migrate`.
+Vous pouvez désormais essayer de vous connecter depuis l'adresse `/connexion`. Vous devrez soit créer un compte manuellement dans la console si cela n'a pas été fait auparavant grâce à la commande `manage.py createsuperuser`, soit renseigner le nom d'utilisateur et le mot de passe du compte super-utilisateur que vous avez déjà créé.
 
 Si vous entrez une mauvaise combinaison, un message d'erreur sera affiché, sinon, vous serez connectés !
 
@@ -249,7 +250,7 @@ def deconnexion(request):
 Avec comme routage : 
 
 ```python
-url(r'^deconnexion/$', 'blog.views.deconnexion', name='deconnexion'),
+url(r'^deconnexion$', 'auth.views.deconnexion', name='deconnexion'),
 ```
 
 ### Intéragir avec le profil utilisateur
@@ -267,14 +268,14 @@ def dire_bonjour(request):
     return HttpResponse("Salut, anonyme.")
 ```
 
-Maintenant, imaginons que nous souhaitions autoriser l'accès de certaines vues _uniquement_ aux utilisateurs connectés. Nous pourrions vérifier si l'utilisateur est connecté, et si ce n'est pas le cas le rediriger vers une autre page, mais cela serait lourd et redondant. Pour éviter de se répéter, Django fournit un petit décorateur très pratique qui nous permet de nous assurer qu'uniquement des visiteurs authentifiés accèdent à la vue. Son nom est `login_required` et il se situe dans `django.contrib.auth.decorators`. En voici un exemple d'utilisation :
+Maintenant, imaginons que nous souhaitions autoriser l'accès de certaines vues _uniquement_ aux utilisateurs connectés. Nous pourrions vérifier si l'utilisateur est connecté, et si ce n'est pas le cas le rediriger vers une autre page, mais cela serait lourd et redondant. Pour éviter de se répéter, Django fournit un décorateur très pratique qui nous permet de nous assurer qu'uniquement des visiteurs authentifiés accèdent à la vue. Son nom est `login_required` et il se situe dans `django.contrib.auth.decorators`. En voici un exemple d'utilisation :
 
 ```python
 from django.contrib.auth.decorators import login_required
 
 @login_required
 def ma_vue(request):
-    …
+    # …
 ```
 
 Si l'utilisateur n'est pas connecté, il sera redirigé vers l'URL de la vue de connexion. Cette URL est normalement définie depuis la variable `LOGIN_URL` dans votre `settings.py`. Si ce n'est pas fait, la valeur par défaut est `'/accounts/login/'`. Comme nous avons utilisé l'URL `'/connexion/'` tout à l'heure, réindiquons-la ici :
@@ -292,7 +293,7 @@ from django.contrib.auth.decorators import login_required
 
 @login_required(redirect_field_name='rediriger_vers')
 def ma_vue(request):
-    …
+    # …
 ```
 
 Vous pouvez également spécifier une autre URL de redirection pour la connexion, au lieu de prendre `LOGIN_URL` dans le `settings.py` :
@@ -303,7 +304,7 @@ from django.contrib.auth.decorators import login_required
 
 @login_required(login_url='/connexion_pour_concours/')
 def jeu_concours(request):
-    …
+    # …
 ```
 
 Enfin, comme pour les modèles, Django utilise des signaux pour certains événements utilisateurs : 
@@ -317,11 +318,15 @@ Enfin, comme pour les modèles, Django utilise des signaux pour certains événe
 Les vues génériques
 -------------------
 
-L'application `django.contrib.auth` contient certaines vues génériques très puissantes et pratiques qui permettent de réaliser les tâches communes d'un système utilisateurs sans devoir écrire une seule vue : se connecter, se déconnecter, changer le mot de passe et récupérer un mot de passe perdu.
+L'application `django.contrib.auth` contient certaines vues qui permettent de réaliser les tâches communes d'un système utilisateurs sans devoir écrire une seule vue : se connecter, se déconnecter, changer le mot de passe et récupérer un mot de passe perdu.
 
-Pourquoi alors avoir expliqué comment gérer manuellement la (dé)connexion ? En réalité, les vues génériques répondent à un besoin basique. Si vous avez besoin d'implémenter des spécificités lors de la connexion, il est important de savoir comment procéder manuellement.
+Pourquoi alors avoir expliqué comment gérer manuellement la (dé)connexion ? En réalité, ces vues répondent à un besoin basique. Si vous avez besoin d'implémenter des spécificités lors de la connexion, il est important de savoir comment procéder manuellement.
 
-Vous avez vu comment utiliser les vues génériques dans le chapitre dédié ; nous ne ferons donc ici que les lister, avec leurs paramètres et modes de fonctionnement.
+Pour utiliser ces vues, il suffit de leur assigner une URL et de passer les éventuels paramètres que vous souhaitez changer : 
+
+    (r'^connexion$', 'django.contrib.auth.views.login', {'template_name': 'auth/connexion.html'})
+
+Nous ne ferons ensuite que les lister, avec leurs paramètres et modes de fonctionnement.
 
 ### Se connecter
 
@@ -483,13 +488,13 @@ class Article(models.Model):
     date = models.DateTimeField(auto_now_add=True, auto_now=False, verbose_name="Date de parution")
     categorie = models.ForeignKey(Categorie)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.titre
 
     class Meta:
         permissions = (
-                ("commenter_article", "Commenter un article"),
-                ("marquer_article", "Marquer un article comme lu"),
+            ("commenter_article", "Commenter un article"),
+            ("marquer_article", "Marquer un article comme lu"),
         )
 ```
 
@@ -512,7 +517,7 @@ from django.contrib.auth.decorators import permission_required
 
 @permission_required('blog.commenter_article')
 def article_commenter(request, article):
-    …
+    # …
 ```
 
 Sachez qu'il est également possible de créer une permission dynamiquement. Pour cela, il faut importer le modèle `Permission`, situé dans `django.contrib.auth.models`. Ce modèle possède les attributs suivants :
@@ -532,9 +537,10 @@ from django.contrib.contenttypes.models import ContentType
 article.save()
 
 content_type = ContentType.objects.get(app_label='blog', model='Article')
-permission = Permission.objects.create(codename='commenter_article_{0}'.format(article.id),
-                                       name='Commenter l'article "{0}"'.format(article.titre),
-                                       content_type=content_type)
+permission = Permission.objects.create(
+    codename='commenter_article_{0}'.format(article.id),
+    name='Commenter l\'article "{0}"'.format(article.titre),
+    content_type=content_type)
 ```
 
 Une fois que la permission est créée, il est possible de l'assigner à un utilisateur précis de cette façon :
