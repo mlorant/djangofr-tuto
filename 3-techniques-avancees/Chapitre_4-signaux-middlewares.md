@@ -85,7 +85,7 @@ Il existe d'autres signaux inclus par défaut. Ils sont expliqués dans la docum
 
 Sachez que vous pouvez tester tous ces signaux simplement en créant une fonction affichant une ligne dans la console (avec `print`) et en liant cette fonction aux signaux désirés.
 
-Heureusement, si vous vous sentez limités par la (maigre) liste de types de signaux fournis par Django, sachez que vous pouvez en créer vous-mêmes. Le processus est plutôt simple. Chaque signal est en fait une instance de `django.dispatch.Signal`. Pour créer un nouveau signal, il suffit donc de créer une nouvelle instance, et de lui dire quels arguments le signal peut transmettre :
+Heureusement, si vous vous sentez limités par la liste de types de signaux fournis par Django, sachez que vous pouvez en créer vous-mêmes. Le processus est plutôt simple. Chaque signal est en fait une instance de `django.dispatch.Signal`. Pour créer un nouveau signal, il suffit donc de créer une nouvelle instance, et de lui dire quels arguments le signal peut transmettre :
 
 ```python
 from django.dispatch import Signal
