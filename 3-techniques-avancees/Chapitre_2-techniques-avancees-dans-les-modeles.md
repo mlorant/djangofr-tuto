@@ -331,14 +331,14 @@ Une relation générique d'un modèle est une relation permettant de lier une en
 Voici une ébauche de ce modèle `Commentaire` avec une relation générique :
 
     from django.contrib.contenttypes.models import ContentType
-    from django.contrib.contenttypes import generic
+    from django.contrib.contenttypes.fieds import GenericForeignKey
     
     class Commentaire(models.Model):
         auteur = models.CharField(max_length=255)
         contenu = models.TextField()
         content_type = models.ForeignKey(ContentType)
         object_id = models.PositiveIntegerField()
-        content_object = generic.GenericForeignKey('content_type', 'object_id')
+        content_object = GenericForeignKey('content_type', 'object_id')
 
         def __str__(self):
             return "Commentaire de {0} sur {1}".format(self.auteur, self.content_object)
@@ -368,15 +368,15 @@ Avant de terminer, sachez qu'il est également possible d'ajouter une relation g
 
 Si nous reprenons le modèle `Eleve`, cette fois modifié :
 
-    from django.contrib.contenttypes import generic
+    from django.contrib.contenttypes.fields import GenericRelation
 
     class Eleve(models.Model):
         nom = models.CharField(max_length=31)
         moyenne = models.IntegerField(default=10)
-        commentaires = models.GenericRelation(Commentaire)
+        commentaires = GenericRelation('Commentaire')
 
         def __str__(self):
-            return u"Élève {0} ({1}/20 de moyenne)".format(self.nom, self.moyenne)
+            return "Élève {0} ({1}/20 de moyenne)".format(self.nom, self.moyenne)
 
 Dès lors, le champ commentaires contient tous les commentaires adressés à l'élève :
 
@@ -385,7 +385,7 @@ Dès lors, le champ commentaires contient tous les commentaires adressés à l'�
 
 Sachez que si vous avez utilisé des noms différents que `content_type` et `object_id` pour construire votre `GenericForeignKey`, vous devez également le spécifier lors de la création de la `GenericRelation` :
 
-    commentaires = models.GenericRelation(Commentaire,
+    commentaires = GenericRelation(Commentaire,
                                           content_type_field="le_champ_du_content_type",
                                           object_id_field="le champ_de_l_id")
 

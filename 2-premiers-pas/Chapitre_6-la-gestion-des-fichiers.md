@@ -14,7 +14,8 @@ Pour introduire la gestion des images, prenons un exemple simple : considérons 
         nom = models.CharField(max_length=255)
         adresse = models.TextField()
         photo = models.ImageField(upload_to="photos/")
-        def __unicode__(self):
+
+        def __str__(self):
                return self.nom
 
 La nouveauté ici est bien entendu `ImageField`. Il s'agit d'un champ Django comme les autres, si ce n'est qu'il contiendra une image (au lieu d'une chaîne de caractères, une date, un nombre…).
