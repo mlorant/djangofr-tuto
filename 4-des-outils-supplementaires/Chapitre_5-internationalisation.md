@@ -226,3 +226,342 @@ Vous pouvez déjà tester, en changeant la variable `nb_chats` de 2 à 1, les «
 Cependant, nous avons encore un autre problème. Lorsque nous imaginons une traduction en anglais de cette chaîne, une des solutions pour le cas singulier serait : « … and according to my information, you have %s %s cat », afin d'avoir « … and according to my information, you have 1 white cat » par exemple. Cependant, en français, l'adjectif se situe après le nom contrairement à l'anglais où il se situe avant. Cela nécessite d'inverser l'ordre de nos variables à l'affichage : dans le cas présent nous allons plutôt obtenir « you have white 1 cat » !
 
 Pour ce faire, il est possible de nommer les variables au sein de la chaîne de caractères, ce que nous vous recommandons de faire tout le temps, même si vous n'avez qu'une variable dans votre chaîne. Une troisième version de notre vue est donc :
+
+
+```python
+def test_i18n(request):
+    nb_chats = 2
+    couleur = "blanc"  # Nous supposons que tous les chats vont avoir la même couleur
+    chaine = _(u"Bonjour les zéros !")
+    ip = _(u"Votre IP est %(ip)s") % {'ip': request.META['REMOTE_ADDR']}
+    infos = ungettext("… et selon mes informations, vous avez %(nb)s chat %(color)s !",
+                      "… et selon mes informations, vous avez %(nb)s chats %(color)ss !",
+                      nb_chats) % {'nb': nb_chats, 'color': couleur}
+
+    return render(request, 'test_i18n.html', locals())
+```
+
+De cette façon, il sera possible d'inverser l'ordre de `%(nb)s` et `%(color)s`, permettant la traduction la plus naturelle possible.
+
+Pour finir la thématique des vues, nous allons aider encore un peu plus les traducteurs. Il se peut que certaines chaînes soient difficiles à traduire hors de leur contexte. Par exemple, imaginons que vous ayez la chaîne suivante :
+
+```python
+quota = _("3 livres")
+```
+
+Ici, si nous ne connaissons pas du tout le contexte, le mot « livre » pourrait correspondre à l'objet que nous lisons, mais aussi à l'unité de poids dans le système de mesures anglo-saxon. Dans ce cas, il est bon de préciser au traducteur ce que signifie réellement la chaîne. Pour ce faire, nous allons commenter notre code, en préfixant le commentaire par `Translators` :
+
+
+```python
+# Translators: This message informs the user about how many books he can borrow
+quota = _("3 livres")
+```
+
+Ainsi, vous signalez aux traducteurs la signification de votre chaîne, pour éviter toute ambiguïté. Dans le même genre, il se peut qu'apparaisse deux fois la même chaîne, mais ne signifiant pas la même chose, typiquement les [homographes](http://fr.wikipedia.org/wiki/Homonymie#Homographie) ! Pour résoudre ce problème, il est possible d'ajouter un marqueur de contexte, permettant de différencier les deux chaînes, et ainsi générer deux traductions distinctes. Cela nécessite l'import de la fonction `pgettext` : 
+
+```python hl_lines="4-5"
+from django.utils.translation import pgettext
+
+sujet = _("tu")
+verbe = pgettext("verbe 'avoir'", "as")
+valeur = pgettext("carte de jeu", "as")
+couleur = _("trèfle")
+carte = _("%(suj)s %(ver)s : %(val)s de %(col)s") % {"suj": sujet, "ver": verbe, "val": valeur, "col": couleur}
+```
+
+### Cas des modèles
+
+Pour nos modèles, la technique est en réalité la même, sauf qu'il faut utiliser la méthode `ugettext_lazy` au lieu de `gettext` pour la même raison que celle évoquée avec les vues génériques et la fonction `reverse_lazy` : nous souhaitons que la traduction soit effectuée à l'exécution et non à la déclaration des classes, lors de la validation des modèles par le serveur. La traduction sera alors effectuée seulement quand la chaîne sera affichée. L'utilisation des fonctions `pgettext` et `ungettext` est également similaire à ce mode de fonctionnement, au détail près qu'il faut les suffixer par `_lazy`.
+
+De la même façon, nous allons appeler la fonction `ugettext_lazy` (que nous renommons en `_`, pour plus de simplicité comme nous l'avons fait plus haut) et l'appliquer à toutes nos chaînes de caractères, par exemple ici avec le fichier `models.py` de notre application `mini_url` :
+
+```python
+from django.db import models
+import random
+import string
+from django.utils.translation import ugettext_lazy as _
+
+
+class MiniURL(models.Model):
+    url = models.URLField(verbose_name=_("URL à réduire"), unique=True)
+    code = models.CharField(max_length=6, unique=True)
+    date = models.DateTimeField(auto_now_add=True, verbose_name=_("Date d'enregistrement"))
+    pseudo = models.CharField(max_length=255, blank=True, null=True)
+    nb_acces = models.IntegerField(default=0, verbose_name=_("Nombre d'accès à l'URL"))
+
+    def __str__(self):
+        return "[{0}] {1}".format(self.code, self.url)
+
+    def save(self, *args, **kwargs):
+        if self.pk is None:
+            self.generer(6)
+
+        super(MiniURL, self).save(*args, **kwargs)
+
+    def generer(nb_caracteres):
+        caracteres = string.ascii_letters + string.digits
+        aleatoire = [random.choice(caracteres) for _ in range(nb_caracteres)]
+        
+        self.code = ''.join(aleatoire)
+
+    class Meta:
+        verbose_name = _("Mini URL")
+        verbose_name_plural = _("Minis URLs")
+```
+
+Traduire les chaînes dans nos templates
+---------------------------------------
+
+La traduction dans les templates repose également sur l'outil *gettext*. Cependant, dans nos templates, les tags permettant l'internationalisation ont des noms différents des fonctions disponibles dans `django.utils.translation`. 
+
+Commençons d'abord par importer les tags nécessaires. Comme pour nos propres _templatetags_, les tags d'internationalisation sont disponibles après avoir effectué un `{% load i18n %}`, au début de chacun de vos templates. Dès que vous souhaitez internationaliser un template, pensez donc à ajouter tout en haut cette ligne.
+
+Nous allons maintenant voir les deux tags, assez similaires, permettant de faire de la traduction dans nos templates, à savoir `{% trans %}` et `{% blocktrans %}`.
+
+
+### Le tag {% trans %}
+
+Ce tag permet de traduire à la fois une chaîne de caractères constante, mais aussi une variable :
+
+```jinja
+<h2>{% trans "Contactez-nous !" %}</h2>
+<p>{% trans ma_variable %}</p>
+```
+
+En interne, ces blocs appellent la fonction `ugettext()`, introduite précédemment. Vous pouvez donc imaginer que le fonctionnement est identique à ce que nous avons vu. Dans le cas d'une variable (`{% trans ma_variable %}` dans le code précédent), la traduction sera recherchée à l'exécution de la page, en fonction du contenu même de la variable. Comme pour les chaînes de caractères, si le contenu de cette variable n'est pas présent dans les traductions, alors son contenu sera affiché tel quel.
+
+Il est également possible de générer la traduction d'une chaîne sans l'afficher. Cela est utile si vous utilisez plusieurs fois la même chaîne dans un même template :
+
+```jinja
+{% trans "Contactez-nous" as titre %}
+<title>{{ titre }} - {% trans "Blog sur les crêpes bretonnes" %}</title>
+<meta name="description" content="{{ titre }}, {% trans "sur notre magnifique blog de crêpes" %}">
+```
+
+Cela permet aussi de clarifier le code, en réduisant le poids total du template. Enfin, le tag `{% trans %}` supporte également le marqueur de contexte, afin de différencier les homonymes, comme avec `pgettext` :
+
+```jinja
+{% trans "Est" context "Verbe être" %}
+{% trans "Est" context "Cardinalité" %}
+```
+
+Ici, deux traductions différentes pourront être déclarées, pour différencier les deux cas, l'un qui concerne la cardinalité et l'autre qui concerne le fameux verbe auxiliaire. 
+
+### Le tag {% blocktrans %} 
+
+Contrairement au tag simple `{% trans %}`, les blocs `{% blocktrans %} {% endblocktrans %}` permettent d'exécuter des schémas plus complexes de traduction. Par exemple, il est possible d'incorporer des variables au sein d'un bloc :
+
+```jinja
+{% blocktrans %}Vous avez {{ age }} ans.{% endblocktrans %}
+```
+
+Cependant, pour accéder à des expressions (attributs d'un objet, utilisation de filtres…), il faut déclarer ces expressions comme variables locales du bloc de traduction, avec le mot-clé `with` :
+
+```jinja
+{% blocktrans with nom=user.nom prenom=user.prenom nb_articles=panier|length %}
+    Vous êtes {{ prenom }} {{ nom }}. Vous avez {{ nb_articles }} articles dans votre panier.
+{% endblocktrans %}
+```
+
+À l'image de `ungettext`, `{% blocktrans %}` permet également la gestion des pluriels. Pour ce faire :
+
+ - Il faut préciser quel est le nombre qui différencie singulier et pluriel via la syntaxe `count nombre=ma_variable` (où `nombre` sera le nom de la variable locale au bloc `blocktrans`) ;
+ - Déclarer deux nouveaux sous-blocs, séparés par le tag `{% plural %}` : un pour le cas du singulier et un pour le cas du pluriel. Il est également possible de déclarer une variable pour préciser le nombre d'articles précis, comme dans l'exemple ci-dessous avec `nb`.
+
+Un exemple d'utilisation est probablement plus parlant :
+
+```jinja
+{% blocktrans count nb=articles|length %}
+   Vous avez 1 article dans votre panier.
+{% plural %}
+   Vous avez {{ nb }} articles dans votre panier.
+{% endblocktrans %}
+```
+
+Il est bien entendu possible de combiner ce tag avec le mot-clé `with`, ce qui donne une structure encore plus complète :
+
+```jinja
+{% blocktrans with total=commande.total count nb=commande.articles|length %}
+   Vous avez 1 article dans votre panier. Prix total : {{ total }}
+{% plural %}
+   Vous avez {{ nb }} articles dans votre panier. Prix total : {{ total }}
+{% endblocktrans %}
+```
+
+Enfin, comme pour le bloc `{% trans %}`, le bloc `{% blocktrans %}` supporte la gestion du contexte :
+
+```jinja
+{% blocktrans with pseudo=user.username context "lien de parenté" %}
+Les fils de {{ pseudo }}
+{% endblocktrans %}
+```
+
+### Aidez les traducteurs en laissant des notes !
+
+Nous avons globalement fait le tour des fonctionnalités de traduction dans les templates ! En effet, tous les comportements sont gérés automatiquement par les deux tags que nous venons de voir, en fonction des arguments fournis. Il nous reste juste à voir comment guider les traducteurs dans leur tâche.
+
+Comme pour la partie concernant les vues et les modèles, il est possible de laisser des notes aux traducteurs, via des commentaires. Pour ce faire, il faut également commencer par `Translators:`, dans un tag `{# #}` ou `{% comment %}`, comme ce que nous avons vu précédemment :
+
+```jinja
+{# Translators: Phrase courte, dans un bouton pour la recherche #}
+{% trans "Go !" %}
+
+{% comment %}Translators: Phrase affichée dans le header du site{% endcomment %}
+{% blocktrans %}Notre phrase d'accroche géniale !{% endblocktrans %}
+```
+
+Sortez vos dictionnaires, place à la traduction !
+-------------------------------------------------
+
+Nous avons désormais terminé tout ce qui concerne le développeur, nous allons sortir du code et des templates quelques instants pour nous attaquer au travail du traducteur. En effet, nous avons déterminé quelles chaînes doivent être traduites ; maintenant, il ne reste plus qu'à les traduire.
+
+### Génération des fichiers .po
+
+Afin d'attaquer la traduction, il va nous falloir un support où nous pourrons faire la correspondance entre les chaînes dans notre code et leur traduction. Pour cela, gettext utilise des fichiers spécifiques, contenant les traductions, dont l'extension est `.po` (pour _Portable Object File_). Voici un extrait d'un des fichiers que nous allons générer :
+
+```
+#: .\blog\views.py:77
+msgid "Bienvenue !"
+msgstr ""
+
+#: blog/views.py:20
+#, python-format
+msgid "Votre IP est %s"
+msgstr ""
+```
+
+Pour permettre la traduction de l'application en plusieurs langues, chaque langue aura son propre dossier avec ses fichiers `.po`. Nous allons tout d'abord générer ces fichiers.
+
+Avant de commencer, il va nous falloir créer un dossier `locale`, qui contiendra l'ensemble des traductions pour toutes nos langues. Ce dossier peut se situer soit au sein d'un projet, si nous souhaitons traduire l'ensemble des applications en un seul endroit, soit dans le dossier d'une application afin de lier chaque application à ses propres traductions. Automatiquement, Django mettre les traductions dans le dossier `locale` de l'application s'il existe, ou dans un des dossiers que l'on va définir pour le projet autrement. 
+
+[[information]]
+| Les traductions faites au sein des dossiers d'applications sont prioritaires sur les traductions disponibles dans le dossier du projet.
+
+Il faut donc indiquer à Django où se situent les fichiers de traduction du projet pour qu'il puisse les utiliser. Pour ce faire, indiquez la ligne suivante dans votre `settings.py` :
+
+```python
+LOCALE_PATHS = (
+    os.path.join(BASE_DIR, '/locale/'),
+)
+```
+
+... et créez un dossier `locale` à la racine du projet.    
+La création de ces fichiers `.po` est automatisé par Django : grâce à `manage.py`, il est possible de générer les fichiers, via un appel à gettext. Pour créer un dossier dans `locale` contenant les traductions en anglais, utilisez la commande suivante, à la racine de votre projet ou dans une application :
+
+```console
+python manage.py makemessages -l en
+```
+
+Après quelques secondes, un dossier `locale/en/LC_MESSAGES`, contenant comme unique fichier `django.po` apparaît. Ce fichier contient des métadonnées ainsi que l'ensemble des traductions, comme nous avons pu le montrer précédemment.
+
+[[attention]]
+| Si vous ne possédez pas gettext, les fichiers seront très probablement vides ! Veuillez vous référer au début de ce chapitre si cela se produit.
+
+Si jamais vous mettez à jour votre projet et modifiez les chaînes à traduire via le processus i18n, vous devrez mettre à jour vos fichiers `.po` en utilisant la commande :
+
+```console
+python manage.py makemessages --all
+```
+
+Ainsi, les traductions déjà effectuées resteront intactes, et celles qui doivent être modifiées ou ajoutées seront insérées dans le fichier déjà existant.
+
+Une fois ce fichier généré, le travail de traduction commence : chaque chaîne à traduire est représentée dans le fichier par une ligne `msgid`. Chaque `msgid` est éventuellement précédé d'informations afin d'aider le traducteur (fichier et ligne à laquelle se situe la chaîne), mais aussi les commentaires éventuels que vous avez laissés.
+
+Les lignes qui suivent le `msgid` correspondent à la traduction dans la langue du dossier (ici l'anglais pour le code `en`). Dans le cas des traductions courtes, il y a juste un `msgstr` à renseigner. Autrement, deux cas se présentent.
+
+Dans le cas de messages plus longs, `msgid` commence par une chaîne vide `""`, et continue à la ligne. Il est important de laisser pour gettext cette chaîne vide. Vous devez agir de la même façon pour la traduction : les chaînes seront automatiquement concaténées (attention aux espaces entre les mots après concaténation !). Ce cas se présente lorsque la longueur totale de la ligne dépasse les 80 caractères. Voici un exemple :
+
+```
+#: .\templates\blog\accueil.html.py:4
+msgid ""
+"Ici, nous parlons de tout et de rien, mais surtout de rien. Mais alors, vous "
+"allez me demandez quel est le but de ce paragraphe ? Je vais vous répondre "
+"simplement : il n'en a aucun."
+msgstr ""
+"Here, we talk about everything and anything, but mostly nothing. So, you "
+"will ask me what is the purpose of this paragraph... I will answer "
+"simply : none, it's useless!"
+```
+
+Le second cas pouvant se présenter est celui des traductions avec la gestion du pluriel. Si vous regardez notre exemple avec nos fameux chats blancs, le rendu dans le fichier `.po` est le suivant :
+
+```
+#: .\blog\views.py:80
+#, python-format
+msgid "… et selon mes informations, vous avez %(nb)s chat %(color)s !"
+msgid_plural ""
+"… et selon mes informations, vous avez %(nb)s chats %(color)ss !"
+msgstr[0] ""
+msgstr[1] ""
+```
+
+L'entrée `msgstr[0]` correspond alors au message traduit au singulier, et le second, au pluriel. Remarquez que, ici encore, `msgid_plural` est passé à la ligne, puisque la chaîne est légèrement trop longue (81 caractères sur les 80 maximum !).
+
+Nous en avons déjà terminé avec les fichiers `.po`, vous savez désormais où répertorier vos traductions.
+
+### Génération des fichiers .mo
+
+Une fois les fichiers `.po` complétés, il faut les compiler dans un format que gettext peut comprendre. En effet, afin d'optimiser ses temps de traitement, gettext souhaite obtenir les fichiers dans un nouveau format, binaire cette fois-ci, les fichiers `.mo` (pour _Machine Object File_). Pour ce faire, il suffit simplement d'entrer la commande suivante, au même endroit où vous avez effectué `makemessages` :
+
+```console
+python manage.py compilemessages
+```
+
+Une fois cela effectué, un fichier `.mo` est censé apparaître à côté de chacun de vos fichiers `.po`. Django ira chercher automatiquement ces fichiers et en extraira le contenu, avec vos traductions ! Pensez donc bien à recompiler vos fichiers gettext à chaque modification.
+
+Le changement de langue
+-----------------------
+
+Nous avons maintenant une application pouvant gérer plusieurs langues, mais l'utilisateur ne peut pas forcément choisir celle qu'il souhaite utiliser. Pour ce faire, il existe trois méthodes permettant de choisir la langue à afficher.
+
+Une première méthode consiste à utiliser la fonction `django.utils.translation.activate`. Cette fonction s'utilise surtout en dehors des vues et des templates et est plutôt destinée à la gestion de la langue dans des crons par exemple. Elle permet d'assigner la langue à utiliser pour le thread actuel :
+
+```python
+>>> from django.utils import translation
+>>> from django.utils.translation import ugettext as _
+>>> translation.activate('en')
+>>> print _("Bonjour les nouveaux !")
+Hello newbies!lan
+```
+
+La méthode la plus conventionnelle est toutefois d'assigner une langue à l'utilisateur via une vue générique. Il vous faut tout d'abord ajouter cette directive de routage dans votre `urls.py` principal :
+
+```python
+(r'^i18n/', include('django.conf.urls.i18n'))
+```
+
+Cette vue est censée recevoir des arguments provenant d'un formulaire. Pour ce faire, nous avons établi le template suivant :
+
+```html
+{% load i18n %}
+<h1>Changer de langue</h1>
+
+{% trans "Bonjour les nouveaux !" %}
+
+<form action="/i18n/setlang/" method="post">
+    {% csrf_token %}
+    <input name="next" type="hidden" value="{% url 'accueil' %}" />
+    
+    <select name="language">
+    {% for lang in LANGUAGES %}
+        <option value="{{ lang.0 }}">{{ lang.1 }}</option>
+    {% endfor %}
+    </select>
+
+    <input type="submit" />
+</form>
+```
+
+Rendez ce template accessible depuis une vue classique ou une vue générique et n'oubliez pas de modifier le paramètre `next` du formulaire qui indique vers quelle URL l'utilisateur doit être redirigé après avoir validé le formulaire. Si vous n'indiquez pas ce paramètre, l'utilisateur sera redirigé d'office vers `/`.
+
+La liste des langues que l'on a défini au début sera affichée dans le formulaire et le choix envoyé à Django après la soumission du formulaire. Vous verrez dès lors la phrase « Bonjour les zéros ! » traduite dans la langue que vous avez choisie.
+
+En résumé
+---------
+
+ - Le processus de traduction se divise en deux parties :
+    - L'internationalisation, où nous indiquons ce qui est à traduire ;
+    - La localisation, où nous effectuons la traduction et l'adaptation à la culture.
+ - Ce processus se base essentiellement sur l'utilisation de l'outil *gettext*, permettant la génération de fichiers de traduction utilisables par des novices en développement.
+ - Django permet également d'adapter l'affichage des dates et des nombres à la langue, en même temps que leur traduction.
+ - Grâce aux sessions et aux middlewares, le framework peut deviner la langue de l'utilisateur automatiquement, en fonction de son navigateur ou de ses précédentes visites.

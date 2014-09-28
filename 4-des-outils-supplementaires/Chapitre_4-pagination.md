@@ -14,12 +14,13 @@ Django fournit une classe nommée `Paginator` qui effectue la pagination. Elle s
 
 ```python
 >>> from django.core.paginator import Paginator
->>> villes = ['Tokyo','Mexico','Seoul','New York','Bombay','Karachi','Sao Paulo','Manille','Bangkok',
-'New Delhi','Djakarta','Shanghai','Los Angeles','Kyoto','Le Caire','Calcutta','Moscou','Istanbul',
-'Buenos Aires','Dacca','Gauteng','Teheran','Pekin']
+>>> villes = ['Tokyo', 'Mexico', 'Seoul', 'New York', 'Bombay', 'Karachi', 
+'Sao Paulo', 'Manille', 'Bangkok', 'New Delhi', 'Djakarta', 'Shanghai',
+'Los Angeles', 'Kyoto', 'Le Caire', 'Calcutta', 'Moscou', 'Istanbul',
+'Buenos Aires', 'Dacca', 'Gauteng', 'Teheran', 'Pekin']
 ```
 
-La classe `Paginator` est instanciée avec deux paramètres : la liste d'objets à répartir et le nombre maximum d'objets à afficher par page. Imaginons que nous souhaitions afficher 5 villes par page, nous pouvons instancier la classe de la manière suivante :
+La classe `Paginator` est instanciable avec deux paramètres : la liste d'objets à répartir et le nombre maximum d'objets à afficher par page. Imaginons que nous souhaitions afficher 5 villes par page, nous pouvons instancier la classe de la manière suivante :
 
 ```python
 >>> p = Paginator(villes, 5)
@@ -40,7 +41,7 @@ Cet objet possède les attributs suivants :
 Nous pouvons obtenir les villes d'une page précise grâce la méthode `page()`. Cette méthode renvoie un objet `Page`, dont voici les méthodes principales :
 
 ```python
->>> page1 = p.page(1) #Renvoie un objet Page pour notre première page
+>>> page1 = p.page(1)  # Renvoie un objet Page pour notre première page
 >>> page1
 <Page 1 of 5>
 >>> page1.object_list      # Le contenu de cette première page
@@ -75,7 +76,7 @@ Avant d'attaquer l'utilisation de la pagination dans nos vues et templates, étu
 Tout d'abord, le paramètre `orphans` permet de préciser le nombre minimum d'éléments qu'il faut pour afficher une dernière page. Si le nombre d'éléments est inférieur au nombre requis, alors ces éléments sont déportés sur la page précédente (qui devient elle-même la dernière page), en plus des éléments qu'elle contient déjà. Prenons notre exemple précédent :
 
 ```python
->>> p = Paginator(villes, 10, 5)
+>>> p = Paginator(villes, 10, orphans=5)
 >>> p.num_pages
 2
 >>> p.page(1).object_list
@@ -89,8 +90,10 @@ Nous voyons que la dernière page théorique (la 3^e^) aurait du contenir 3 él�
 Le second attribut optionnel, `allow_empty_first_page`, permet de lancer une exception si la première page est vide. Autrement dit, une exception est levée s'il n'y a aucun élément à afficher. Un exemple est encore une fois plus parlant :
 
 ```python
+# Nous initialisons deux Paginator avec une liste vide
 >>> pagination_avec_vide = Paginator([], 42)  
->>> pagination_sans_vide = Paginator([], 42, 0, False)  # Nous initialisons deux Paginator avec une liste vide
+>>> pagination_sans_vide = Paginator([], 42, allow_empty_first_page=False)
+  
 >>> pagination_avec_vide.page(1)  # Comportement par défaut si la liste est vide
 <Page 1 of 1>
 >>> pagination_avec_vide.page(1).object_list
@@ -125,7 +128,7 @@ Nous traiterons ici le second cas. Le premier cas se résume à un simple `reque
 
 ```python
 def liste(request, page=1):
-   """Affichage des redirections"""
+   """ Affichage des redirections """
    minis = MiniURL.objects.order_by('-nb_acces')
 
    return render(request, 'mini_url/liste.html', locals())
@@ -143,7 +146,7 @@ urlpatterns = patterns('mini_url.views',
 Nous créons donc un objet `Paginator` à partir de cette liste, comme nous avons pu le faire au début de ce chapitre. Nous avons également vu que `Paginator` permettait de récupérer les objets d'une page précise : c'est ce que nous utiliserons désormais pour renvoyer au template la liste d'URL à afficher.
 
 ```python
-from django.core.paginator import Paginator, EmptyPage  # Ne pas oublier l'importation
+from django.core.paginator import Paginator, EmptyPage
 
 def liste(request, page=1):
     """ Affichage des redirections enregistrées """
@@ -151,13 +154,13 @@ def liste(request, page=1):
     paginator = Paginator(minis_list, 5)  # 5 liens par page
 
     try:
-           # La définition de nos URL autorise comme argument « page » uniquement des entiers,
-           # nous n'avons pas à nous soucier de l'erreur PageNotAnInteger
-           minis = paginator.page(page)
+        # La définition de nos URL autorise comme argument « page » uniquement 
+        # des entiers, nous n'avons pas à nous soucier de PageNotAnInteger
+        minis = paginator.page(page)
     except EmptyPage:
-           # Nous vérifions toutefois que nous ne dépassons pas la limite de page
-           # Par convention, nous renvoyons la dernière page dans ce cas
-           minis = paginator.page(paginator.num_pages)
+        # Nous vérifions toutefois que nous ne dépassons pas la limite de page
+        # Par convention, nous renvoyons la dernière page dans ce cas
+        minis = paginator.page(paginator.num_pages)
 
     return render(request, 'mini_url/liste.html', locals())
 ```
@@ -203,7 +206,7 @@ Nous utilisons ici les méthodes `has_next` et `has_previous` pour savoir s'il f
 
 Un bon conseil que nous pouvons vous donner, et en même temps un bon exercice à faire, est de créer un template générique gérant la pagination et de l'appeler où vous en avez besoin, via `{% include "pagination.html" with liste=minis view="url_liste" %}`.
 
-Vous pouvez maintenant adapter la pagination comme vous voulez en modifiant uniquement la ligne appelant `Paginator` ! Par exemple, on peut réutiliser l'argument optionnel pour avoir un minimum de liens sur la dernière page : 
+Vous pouvez maintenant adapter la pagination comme vous voulez en modifiant uniquement la ligne appelant `Paginator` ! Par exemple, on peut réutiliser le troisième argument optionnel `orphans` pour avoir un minimum de liens sur la dernière page : 
 
 ```python
 paginator = Paginator(minis_list, 20, 5)  # 20 liens par page, avec un minimum de 5 liens sur la dernière
