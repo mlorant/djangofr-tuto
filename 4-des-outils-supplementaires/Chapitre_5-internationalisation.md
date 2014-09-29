@@ -214,9 +214,10 @@ def test_i18n(request):
     couleur = "blanc"
     chaine = _("Bonjour les nouveaux !")
     ip = _("Votre IP est %s") % request.META['REMOTE_ADDR']
-    infos = ungettext("… et selon mes informations, vous avez %s chat %s !",
-                      "… et selon mes informations, vous avez %s chats %ss !",
-                      nb_chats) % (nb_chats, couleur)
+    infos = ungettext(
+        "… et selon mes informations, vous avez %s chat %s !",
+        "… et selon mes informations, vous avez %s chats %ss !",
+        nb_chats) % (nb_chats, couleur)
 
     return render(request, 'test_i18n.html', locals())
 ```
@@ -225,17 +226,17 @@ Vous pouvez déjà tester, en changeant la variable `nb_chats` de 2 à 1, les «
 
 Cependant, nous pourrions avoir un autre problème. Parfois, l'ordre des variables peut être différent selon la traduction. Par exemple, « J'ai un chat blanc » peut être traduit par « I have one white cat » en anglais. Si "chat" et "blanc" sont des variables, on aura besoin d'inverser leurs ordre dans la chaine. En effet, avec `_("J'ai un %s %s")` on obtiendrait en anglais "I have one cat white"...
 
-Pour corriger cela, il est possible de nommer les variables au sein de la chaîne de caractères, ce que nous vous recommandons de faire tout le temps, même si vous n'avez qu'une variable dans votre chaîne. Une troisième version de notre vue est donc :
-
+Pour corriger cela, il est possible de nommer les variables au sein de la chaîne de caractères, ce que nous vous recommandons de faire tout le temps, même si vous n'avez qu'une variable dans votre chaîne : 
 
 ```python
 def test_i18n(request):
     nb_chats = 2
     couleur = "blanc"
-    chaine = _("J'ai un %(animal)s %(couleur)s.") % {'animal': 'chat', 'couleur': couleur}
-    infos = ungettext("… et selon mes informations, vous avez %(nb)s chat %(couleur)s !",
-                      "… et selon mes informations, vous avez %(nb)s chats %(couleur)ss !",
-                      nb_chats) % {'nb': nb_chats, 'color': couleur}
+    chaine = _("J'ai un %(animal)s %(col)s.") % {'animal': 'chat', 'col': couleur}
+    infos = ungettext(
+        "… et selon mes informations, vous avez %(nb)s chat %(col)s !",
+        "… et selon mes informations, vous avez %(nb)s chats %(col)ss !",
+        nb_chats) % {'nb': nb_chats, 'col': couleur}
 
     return render(request, 'test_i18n.html', locals())
 ```
@@ -265,12 +266,16 @@ sujet = _("tu")
 verbe = pgettext("verbe 'avoir'", "as")
 valeur = pgettext("carte de jeu", "as")
 couleur = _("trèfle")
-carte = _("%(suj)s %(ver)s : %(val)s de %(col)s") % {"suj": sujet, "ver": verbe, "val": valeur, "col": couleur}
+carte = _("%(suj)s %(ver)s : %(val)s de %(col)s") % {
+    "suj": sujet, 
+    "ver": verbe, 
+    "val": valeur, 
+    "col": couleur}
 ```
 
 ### Cas des modèles
 
-Pour nos modèles, la technique est en réalité la même, sauf qu'il faut utiliser la méthode `ugettext_lazy` au lieu de `gettext` pour la même raison que celle évoquée avec les vues génériques et la fonction `reverse_lazy` : nous souhaitons que la traduction soit effectuée à l'exécution et non à la déclaration des classes, lors de la validation des modèles par le serveur. La traduction sera alors effectuée seulement quand la chaîne sera affichée. L'utilisation des fonctions `pgettext` et `ungettext` est également similaire à ce mode de fonctionnement, au détail près qu'il faut les suffixer par `_lazy`.
+Pour nos modèles, la technique est en réalité la même, sauf qu'il faut utiliser la méthode `ugettext_lazy` au lieu de `ugettext` pour la même raison que celle évoquée avec les vues génériques et la fonction `reverse_lazy` : nous souhaitons que la traduction soit effectuée à l'exécution et non à la déclaration des classes, lors de la validation des modèles par le serveur. La traduction sera alors effectuée seulement quand la chaîne sera affichée. L'utilisation des fonctions `pgettext` et `ungettext` est également similaire à ce mode de fonctionnement, au détail près qu'il faut les suffixer par `_lazy`.
 
 De la même façon, nous allons appeler la fonction `ugettext_lazy` (que nous renommons en `_`, pour plus de simplicité comme nous l'avons fait plus haut) et l'appliquer à toutes nos chaînes de caractères, par exemple ici avec le fichier `models.py` de notre application `mini_url` :
 
@@ -431,7 +436,7 @@ msgstr ""
 
 Pour permettre la traduction de l'application en plusieurs langues, chaque langue aura son propre dossier avec ses fichiers `.po`. Nous allons tout d'abord générer ces fichiers.
 
-Avant de commencer, il va nous falloir créer un dossier `locale`, qui contiendra l'ensemble des traductions pour toutes nos langues. Ce dossier peut se situer soit au sein d'un projet, si nous souhaitons traduire l'ensemble des applications en un seul endroit, soit dans le dossier d'une application afin de lier chaque application à ses propres traductions. Automatiquement, Django mettre les traductions dans le dossier `locale` de l'application s'il existe, ou dans un des dossiers que l'on va définir pour le projet autrement. 
+Avant de commencer, il va nous falloir créer un dossier `locale`, qui contiendra l'ensemble des traductions pour toutes nos langues. Ce dossier peut se situer soit au sein d'un projet, si nous souhaitons traduire l'ensemble des applications en un seul endroit, soit dans le dossier d'une application afin de lier chaque application à ses propres traductions. Automatiquement, Django va mettre les traductions dans le dossier `locale` de l'application s'il existe, ou dans un des dossiers que l'on va définir pour le projet autrement. 
 
 [[information]]
 | Les traductions faites au sein des dossiers d'applications sont prioritaires sur les traductions disponibles dans le dossier du projet.
@@ -451,7 +456,7 @@ La création de ces fichiers `.po` est automatisé par Django : grâce à `manag
 python manage.py makemessages -l en
 ```
 
-Après quelques secondes, un dossier `locale/en/LC_MESSAGES`, contenant comme unique fichier `django.po` apparaît. Ce fichier contient des métadonnées ainsi que l'ensemble des traductions, comme nous avons pu le montrer précédemment.
+Après quelques secondes, un dossier `locale/en/LC_MESSAGES`, contenant comme unique fichier `django.po` apparaît dans chaque application ayant un dossier locale. Ce fichier contient des métadonnées ainsi que l'ensemble des traductions, comme nous avons pu le montrer précédemment.
 
 [[attention]]
 | Si vous ne possédez pas gettext, les fichiers seront très probablement vides ! Veuillez vous référer au début de ce chapitre si cela se produit.
@@ -553,7 +558,7 @@ Cette vue est censée recevoir des arguments provenant d'un formulaire. Pour ce 
 
 Rendez ce template accessible depuis une vue classique ou une vue générique et n'oubliez pas de modifier le paramètre `next` du formulaire qui indique vers quelle URL l'utilisateur doit être redirigé après avoir validé le formulaire. Si vous n'indiquez pas ce paramètre, l'utilisateur sera redirigé d'office vers `/`.
 
-La liste des langues que l'on a défini au début sera affichée dans le formulaire et le choix envoyé à Django après la soumission du formulaire. Vous verrez dès lors la phrase « Bonjour les zéros ! » traduite dans la langue que vous avez choisie.
+La liste des langues que l'on a défini au début sera affichée dans le formulaire et le choix envoyé à Django après la soumission du formulaire. Vous verrez dès lors la phrase « Bonjour les nouveaux ! » traduite dans la langue que vous avez choisie.
 
 En résumé
 ---------
