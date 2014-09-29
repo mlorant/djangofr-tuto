@@ -525,7 +525,7 @@ Une première méthode consiste à utiliser la fonction `django.utils.translatio
 >>> from django.utils.translation import ugettext as _
 >>> translation.activate('en')
 >>> print _("Bonjour les nouveaux !")
-Hello newbies!lan
+Hello newbies!
 ```
 
 La méthode la plus conventionnelle est toutefois d'assigner une langue à l'utilisateur via une vue générique. Il vous faut tout d'abord ajouter cette directive de routage dans votre `urls.py` principal :

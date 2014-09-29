@@ -16,7 +16,7 @@ De plus, lorsqu'un bug s'introduit dans votre code, si vos tests sont bien conç
 
 Enfin, les tests sont considérés comme une preuve de sérieux. Si vous souhaitez que votre projet devienne un logiciel libre, sachez que de nombreux éventuels contributeurs risquent d'être rebutés si votre projet ne dispose pas de tests.
 
-Cela étant dit, attaquons-nous au sujet. 
+### Ecrire un test unitaire
 
 Reprenons notre modèle `Article` introduit précédemment dans l'application « blog ». Nous y avons adjoint une méthode `est_recent` qui renvoie `True` si la date de parution de l'article est comprise dans les 30 derniers jours, sinon elle renvoie `False` :
 
@@ -25,7 +25,8 @@ class Article(models.Model):
     titre = models.CharField(max_length=100)
     auteur = models.CharField(max_length=42)
     contenu = models.TextField()
-    date = models.DateTimeField(auto_now_add=True, auto_now=False, verbose_name="Date de parution")
+    date = models.DateTimeField(auto_now_add=True, auto_now=False, 
+                                verbose_name="Date de parution")
     categorie = models.ForeignKey(Categorie)
 
     def est_recent(self):
@@ -40,7 +41,7 @@ class Article(models.Model):
 
 Une erreur relativement discrète s'y est glissée : que se passe-t-il si la date de parution de l'article se situe dans le futur ? L'article ne peut pas être considéré comme récent, car il n'est pas encore sorti ! Pour détecter une telle anomalie, il nous faut écrire un test.
 
-Les tests sont répartis par application. Chaque application possède en effet par défaut un fichier nommé `tests.py` dans lequel vous devez insérer vos tests. 
+Les tests sont répartis par application. Chaque application possède en effet par défaut un fichier nommé `tests.py` dans lequel vous devez insérer vos tests. En réalité, Django executera tous les tests contenus dans les fichiers commencant par `test`. Ainsi, si votre application possède de nombreux tests, vous pouvez créer un repertoire `tests/` (avec un `__init__.py`) et créer plusieurs fichiers dedans, tous commencant par `test_`. 
 
 Voici notre `tests.py`, incluant le test pour vérifier si un article du futur est récent ou non, comme nous l'avons expliqué ci-dessus :
 
@@ -59,7 +60,7 @@ class ArticleTests(TestCase):
         """
 
         futur_article = Article(date=datetime.now() + timedelta(days=20))
-        #Il n'y a pas besoin de remplir tous les champs ou de sauvegarder l'entrée
+        # Il n'y a pas besoin de remplir tous les champs, ni de sauvegarder
         self.assertEqual(futur_article.est_recent(), False)
 ```
 
@@ -70,36 +71,59 @@ Dans cette classe, chaque méthode dont le nom commence par `test_` représente 
 
 La vérification même se fait grâce à une méthode de `TestCase` nommée `assertEqual`. Cette méthode prend deux paramètres et vérifie s'ils sont identiques. Si ce n'est pas le cas, le test est reporté à Django comme ayant échoué, sinon, rien ne se passe et le test est considéré comme ayant réussi.
 
-Ici, la méthode `est_recent` doit bien renvoyer `False`. Comme nous avons introduit une erreur dans notre modèle, elle est censée renvoyer `True` pour le moment, et donc faire échouer le test.
+Il existe plusieurs méthodes `assert*` pour faire vos tests :
+
+- assertEqual(a, b) 	    -> a == b 	   
+- assertTrue(x) 	        -> bool(x) is True 	 
+- assertFalse(x) 	        -> bool(x) is False 	 
+- assertIs(a, b) 	        -> a is b
+- assertIsNone(x) 	        -> x is None
+- assertIn(a, b) 	        -> a in b
+- assertIsInstance(a, b) 	-> isinstance(a, b)
+
+Hormis `assertTrue` et `assertFalse`, toutes les méthodes ont leur opposé : `assertNotEqual`, `assertIsNot`, `assertNotIn`... qui font la même opération mais avec l'opérateur `not`.
+
+### Lançons notre test en console
+
+Dans notre exemple, la méthode `est_recent` devrait renvoyer `False`. Comme nous avons introduit une erreur dans notre modèle, elle est censée renvoyer `True` pour le moment, et donc faire échouer le test.
 
 Afin d'exécuter nos tests, il faut utiliser la commande `python manage.py test` qui lance tous les tests répertoriés :
 
 ```console
 $ python manage.py test
 Creating test database for alias 'default'...
-......................................................
+F
 ======================================================================
 FAIL: test_est_recent_avec_futur_article (blog.tests.ArticleTests)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/home/mathx/crepes_bretonnes/blog/tests.py", line 31, in test_est_recent_avec_futur_article
+  File "/home/django17/crepes_bretonnes/blog/tests.py", line 12, in test_est_recent_avec_futur_article
     self.assertEqual(futur_article.est_recent(), False)
 AssertionError: True != False
 
 ----------------------------------------------------------------------
-Ran 419 tests in 10.256s
+Ran 1 test in 0.001s
 
-FAILED (failures=1, skipped=1)
+FAILED (failures=1)
 Destroying test database for alias 'default'...
 ```
 
 Comme prévu, le test que nous venons de créer a échoué.
 
-[[information]]
-| 419 tests ont été lancés. C'est normal, car les applications par défaut de Django (utilisateurs, sessions, etc.) possèdent elles aussi des tests qui ont également été exécutés. Si vous souhaitez juste exécuter les tests de l'application « blog », vous pouvez indiquer `python manage.py test blog`, ou également `manage.py test blog.ArticleTests` pour lancer tous les tests de la classe `ArticleTests`, ou directement spécifier un seul test comme ceci : `python manage.py test blog.ArticleTests.test_est_recent_avec_futur_article`.
+Avant de corriger notre test, sachez que vous pouvez choisir les tests à lancer. La commande `test` peut prendre en paramètre le chemin Python des tests à exécuter. Si vous souhaitez juste tester l'application « blog », vous pouvez indiquer `manage.py test blog`. Si vous avez plusieurs fichiers de tests, vous pouvez spécifier le fichier et même la classe à exécuter :
 
+```
+python manage.py test blog.tests
+python manage.py test blog.tests.ArticleTests
+```
 
-Modifions donc la méthode `est_recent` afin de corriger le bug :
+Vous pouvez aller plus loins en spécifiant un seul test précis : 
+
+```
+python manage.py test blog.tests.ArticleTests.test_est_recent_avec_futur_article
+```
+
+Si jamais le chemin renseigné ne correspond à aucun test ou suite de tests, une erreur Python apparaitra. Modifions donc désormais la méthode `est_recent` afin de corriger le bug :
 
 ```python
 def est_recent(self):
@@ -112,15 +136,27 @@ Relançons le test. Comme prévu, celui-ci fonctionne désormais !
 ```console
 python manage.py test
 Creating test database for alias 'default'...
-..............................................
+.
 ----------------------------------------------------------------------
-Ran 419 tests in 10.165s
+Ran 1 test in 0.000s
 
-OK (skipped=1)
+OK
 Destroying test database for alias 'default'...
 ```
 
-Petite précision : vous pouvez préparer votre suite de tests en créant une méthode nommée `setUp` qui permet d'initialiser certaines variables à l'intérieur de votre classe, pour les utiliser dans vos tests par la suite :
+### Initialisation de données pour nos tests
+
+Django n'utilise pas votre base de données de développement pour lancer les tests. Vous pouvez le voir dans les résultats au dessus, une base de test est créée à chaque fois que les tests sont lancés, puis détruite à la fin. Cela permet de ne pas ruiner vos données lors de vos tests et d'être maitre de l'état de la base lors des tests unitaires.
+
+Sachez qu'il est possible de remplir la base à sa création via un `fixture`, qui est un fichier JSON contenant des données initiales. La manière la plus rapide d'en créer un est de faire une base avec quelques données via l'administration de votre site, puis de lancer `manage.py dumpdata blog`, pour l'application blog.  
+Vous devez ensuite enregistrer le résultat de la commande dans un dossier `fixtures` de votre application, par exemple `fixtures/test.json` et spécifier à Django de l'utiliser :
+
+```python
+class ArticleTests(TestCase):
+    fixtures = ['test.json']
+```
+
+Pour finir, vous pouvez préparer votre suite de tests en créant une méthode nommée `setUp` qui permet d'initialiser certaines variables à l'intérieur de votre classe, pour les utiliser dans vos tests par la suite :
 
 
 ```python
@@ -131,6 +167,8 @@ class UnTest(TestCase):
     def test_verification(self):
         self.assertEqual(self.une_variable, "Salut !")
 ```
+
+Cela peut notamment vous servir à récupérer certains objets en base, plutôt que de le faire à chaque test.
 
 Testons des vues
 ----------------
