@@ -45,7 +45,7 @@ La figure suivante schématise les différentes étapes.
 
 Tout au long de ce chapitre, nous allons suivre le déroulement du cycle de la figure précédente, dont tous les détails vous seront expliqués en temps et en heure. Mais tout d'abord, il nous faut configurer un peu notre projet, via `settings.py`.
 
-Par défaut, lors de la création du projet, Django prédéfinit trois variables concernant l'internationalisation et la localisation :
+Par défaut, lors de la création du projet, Django prédéfinit plusieurs variables concernant l'internationalisation et la localisation :
 
 ```python
 # Internationalization
@@ -154,7 +154,7 @@ Pour commencer, créons d'abord une nouvelle vue, qui renverra plusieurs chaîne
 def test_i18n(request):
     nb_chats = 1
     couleur = "blanc"
-    chaine = u"Bonjour les zéros !"
+    chaine = "Bonjour les nouveaux !"
     ip = "Votre IP est %s" % request.META['REMOTE_ADDR']
     infos = "… et selon mes informations, vous avez %s chats %s !" % (nb_chats, couleur)
 
@@ -165,7 +165,7 @@ Et voici le fichier `test_i18n.html` :
 
 ```html
 <p>
-  Bonjour les zéros !<br />
+  Bonjour les nouveaux !<br />
   {{ chaine }}
 </p>
 <p>
@@ -196,7 +196,7 @@ Dès lors, il ne nous reste plus qu'à appliquer cette méthode à nos chaînes 
 def test_i18n(request):
     nb_chats = 1
     couleur = "blanc"
-    chaine = _("Bonjour les zéros !")
+    chaine = _("Bonjour les nouveaux !")
     ip = _("Votre IP est %s") % request.META['REMOTE_ADDR']
     infos = _("… et selon mes informations, vous avez %s chats %s !") % (nb_chats, couleur)
 
@@ -212,7 +212,7 @@ from django.utils.translation import ungettext
 def test_i18n(request):
     nb_chats = 2
     couleur = "blanc"
-    chaine = _("Bonjour les zéros !")
+    chaine = _("Bonjour les nouveaux !")
     ip = _("Votre IP est %s") % request.META['REMOTE_ADDR']
     infos = ungettext("… et selon mes informations, vous avez %s chat %s !",
                       "… et selon mes informations, vous avez %s chats %ss !",
@@ -223,25 +223,24 @@ def test_i18n(request):
 
 Vous pouvez déjà tester, en changeant la variable `nb_chats` de 2 à 1, les « s » après « chat » et « blanc » disparaissent.
 
-Cependant, nous avons encore un autre problème. Lorsque nous imaginons une traduction en anglais de cette chaîne, une des solutions pour le cas singulier serait : « … and according to my information, you have %s %s cat », afin d'avoir « … and according to my information, you have 1 white cat » par exemple. Cependant, en français, l'adjectif se situe après le nom contrairement à l'anglais où il se situe avant. Cela nécessite d'inverser l'ordre de nos variables à l'affichage : dans le cas présent nous allons plutôt obtenir « you have white 1 cat » !
+Cependant, nous pourrions avoir un autre problème. Parfois, l'ordre des variables peut être différent selon la traduction. Par exemple, « J'ai un chat blanc » peut être traduit par « I have one white cat » en anglais. Si "chat" et "blanc" sont des variables, on aura besoin d'inverser leurs ordre dans la chaine. En effet, avec `_("J'ai un %s %s")` on obtiendrait en anglais "I have one cat white"...
 
-Pour ce faire, il est possible de nommer les variables au sein de la chaîne de caractères, ce que nous vous recommandons de faire tout le temps, même si vous n'avez qu'une variable dans votre chaîne. Une troisième version de notre vue est donc :
+Pour corriger cela, il est possible de nommer les variables au sein de la chaîne de caractères, ce que nous vous recommandons de faire tout le temps, même si vous n'avez qu'une variable dans votre chaîne. Une troisième version de notre vue est donc :
 
 
 ```python
 def test_i18n(request):
     nb_chats = 2
-    couleur = "blanc"  # Nous supposons que tous les chats vont avoir la même couleur
-    chaine = _(u"Bonjour les zéros !")
-    ip = _(u"Votre IP est %(ip)s") % {'ip': request.META['REMOTE_ADDR']}
-    infos = ungettext("… et selon mes informations, vous avez %(nb)s chat %(color)s !",
-                      "… et selon mes informations, vous avez %(nb)s chats %(color)ss !",
+    couleur = "blanc"
+    chaine = _("J'ai un %(animal)s %(couleur)s.") % {'animal': 'chat', 'couleur': couleur}
+    infos = ungettext("… et selon mes informations, vous avez %(nb)s chat %(couleur)s !",
+                      "… et selon mes informations, vous avez %(nb)s chats %(couleur)ss !",
                       nb_chats) % {'nb': nb_chats, 'color': couleur}
 
     return render(request, 'test_i18n.html', locals())
 ```
 
-De cette façon, il sera possible d'inverser l'ordre de `%(nb)s` et `%(color)s`, permettant la traduction la plus naturelle possible.
+De cette façon, il sera possible d'inverser l'ordre de `%(animal)s` et `%(couleur)s`, permettant la traduction la plus naturelle possible.
 
 Pour finir la thématique des vues, nous allons aider encore un peu plus les traducteurs. Il se peut que certaines chaînes soient difficiles à traduire hors de leur contexte. Par exemple, imaginons que vous ayez la chaîne suivante :
 
