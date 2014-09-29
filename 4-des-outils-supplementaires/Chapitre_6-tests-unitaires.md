@@ -123,7 +123,8 @@ Vous pouvez aller plus loins en spécifiant un seul test précis :
 python manage.py test blog.tests.ArticleTests.test_est_recent_avec_futur_article
 ```
 
-Si jamais le chemin renseigné ne correspond à aucun test ou suite de tests, une erreur Python apparaitra. Modifions donc désormais la méthode `est_recent` afin de corriger le bug :
+Si jamais le chemin renseigné ne correspond à aucun test ou suite de tests, une erreur Python apparaitra.   
+Maintenant, modifions la méthode `est_recent` afin de corriger le bug :
 
 ```python
 def est_recent(self):
@@ -148,7 +149,7 @@ Destroying test database for alias 'default'...
 
 Django n'utilise pas votre base de données de développement pour lancer les tests. Vous pouvez le voir dans les résultats au dessus, une base de test est créée à chaque fois que les tests sont lancés, puis détruite à la fin. Cela permet de ne pas ruiner vos données lors de vos tests et d'être maitre de l'état de la base lors des tests unitaires.
 
-Sachez qu'il est possible de remplir la base à sa création via un `fixture`, qui est un fichier JSON contenant des données initiales. La manière la plus rapide d'en créer un est de faire une base avec quelques données via l'administration de votre site, puis de lancer `manage.py dumpdata blog`, pour l'application blog.  
+Sachez qu'il est possible de remplir la base à sa création via une `fixture`, qui est un fichier JSON contenant des données initiales. La manière la plus rapide d'en créer un est de faire une base avec quelques données via l'administration de votre site, puis de lancer `manage.py dumpdata blog`, pour l'application blog.  
 Vous devez ensuite enregistrer le résultat de la commande dans un dossier `fixtures` de votre application, par exemple `fixtures/test.json` et spécifier à Django de l'utiliser :
 
 ```python
@@ -203,8 +204,6 @@ class MiniURLTests(TestCase):
 ```
 
 Nous avons créé une petite fonction nommée `creer_url` qui crée une redirection, l'enregistre et la retourne, afin de ne pas devoir dupliquer le code dans nos futurs tests.
-
-Django créera à chaque séance de tests une nouvelle base de données vide et utilisera celle-ci, au lieu d'utiliser la base de données classique, afin d'éviter de compromettre cette dernière.
 
 Intéressons-nous ensuite au test `test_liste` qui va s'assurer que lorsque nous créons une redirection dans la base de données celle-ci est bien affichée par la vue `views.liste`. Pour ce faire, nous créons tout d'abord une redirection grâce à la fonction `creer_url` et nous demandons ensuite au client intégré au système de test d'accéder à la vue `liste` grâce à la méthode `get` de `self.client`. Cette méthode prend une URL, c'est pourquoi nous utilisons la fonction `reverse` afin d'obtenir l'URL de la vue spécifiée.
 
