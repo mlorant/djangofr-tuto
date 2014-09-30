@@ -169,3 +169,143 @@ Si la variable `user` correspond à un utilisateur non connecté, ce tag aura le
 {% get_flatpages prefixe_contact as contact_pages %}
 {% get_flatpages '/contact/' for request.user as contact_pages %}
 ```
+
+Rendons nos données plus lisibles avec humanize 
+-----------------------------------------------
+
+Le module `django.contrib.humanize` fournit un ensemble de filtres permettant d'ajouter, selon les développeurs du framework, « une touche humaine aux données ». Nous allons voir les différents cas où les filtres du module `humanize` rendent la lecture d'une donnée plus agréable à l'utilisateur. L'avantage de ce module est qu'il prend mieux en charge la localisation : la transformation des données s'adapte à la langue de votre projet !
+
+Avant de commencer, ajoutez la ligne `'django.contrib.humanize'` à votre variable `INSTALLED_APPS` dans le fichier `settings.py`. Pour intégrer les filtres présentés par la suite, il faut charger les `templatetags` du module, via la commande `{% load humanize %}`.
+
+### apnumber
+
+Pour les nombres de 1 à 9, ce filtre va les traduire automatiquement en toutes lettres. Dans les autres cas (nombres supérieurs ou égaux à 10), ils seront affichés en chiffres. Cette convention suit le style de l'agence Associated Press.
+
+Exemples (avec la langue du projet en français) :
+
+```jinja
+{{ 1|apnumber }}   renvoie "un"     <br />
+{{ "2"|apnumber }} renvoie "deux"   <br />
+{{ 10|apnumber }}  renvoie 10.
+```
+
+Le filtre prend à la fois des entiers et des chaînes de caractères en paramètre.
+
+### intcomma
+
+Ajoute des séparateurs de milliers, afin de simplifier la lecture. En réalité, le filtre prend en charge la localisation spécifiée dans le fichier `settings.py`, et le séparateur dépend donc de la langue courante : le séparateur sera la virgule si la langue courante est l'anglais par exemple.
+
+Exemples (encore une fois en français puisque le séparateur est l'espace) :
+
+```jinja
+{{ 300|intcomma }}     renvoie 300     <br />
+{{ "9000"|intcomma }}  renvoie 9 000   <br />
+{{ 90000|intcomma }}   renvoie 90 000  <br />
+{{ 9000000|intcomma }} renvoie 9 000 000 <br />
+```
+
+Le filtre prend à la fois des entiers et des chaînes de caractères en paramètre.
+
+
+### intword
+
+Ce filtre permet de convertir les grands entiers en leur représentation textuelle, de préférence avec des nombres supérieurs à un million. Ce filtre respecte également la localisation pour le séparateur décimal.
+
+```jinja
+{# Quelques cas classiques #}
+{{ 1000000|intword }}    renvoie 1,0 million. <br />
+{{ "4525640"|intword }}  renvoie 4,5 millions. <br />
+{{ 20000000|intword }}   renvoie 20,0 millions. <br />
+{{ 999999999|intword }}  renvoie 1000,0 millions. <br />
+{{ 5500000000|intword }} renvoie 5,5 milliards. <br />
+
+{% comment %}Et des cas plus extrêmes. On suppose que mon_salaire = 9 * (10 ** 101), 
+ce qui correspond à un 9 suivi de 101 zéros ! {% endcomment %}
+{{ 1000000000000000000|intword }} renvoie 1,0 quintillion. <br />
+{{ mon_salaire|intword }} renvoie 90,0 gogols.<br />
+
+
+{# Ce filtre ne supporte pas les « petits nombres » #}
+{{ 90000|intword }} renvoie 90000.
+```
+
+Le filtre prend à la fois des entiers et des chaînes de caractères en paramètre.
+
+
+### naturalday
+
+Retourne « aujourd'hui », « hier » ou « demain » si la date est appropriée. Dans les autres cas, la date sera affichée selon le format fourni en paramètre.
+
+Par exemple, si la date actuelle est le 4 mars 2130 : 
+
+**Portion de notre vue :**
+
+```python
+date_avant_hier = datetime(2130, 3, 2)
+date_hier = datetime(2130, 3, 3)
+date_auj = datetime(2130, 3, 4)
+date_demain = datetime(2130, 3, 5)
+```
+
+
+**Template associé :**
+
+```jinja
+{{ date_avant_hier|naturalday:"DATE_FORMAT" }} renvoie "2 mars 2130"<br />
+{{ date_avant_hier|naturalday:"d/m/Y" }} renvoie "02/03/2130"<br />
+{{ date_hier|naturalday:"d/m/Y" }} renvoie "hier"<br />
+{{ date_auj|naturalday:"d/m/Y" }} renvoie "aujourd'hui"<br />
+{{ date_demain|naturalday:"d/m/Y" }} renvoie "demain"<br />
+```
+
+### naturaltime
+
+Retourne une chaîne de caractères précisant le nombre de secondes, minutes ou heures écoulées depuis la date (ou restantes dans le cas d'une date future) :
+
+Exemple, en admettant que nous sommes le 4 mars 2130, à 14:20:00 :
+
+**Portion de notre vue :**
+
+```python
+date1 = datetime(2130, 3, 4, 14, 20, 0)
+date2 = datetime(2130, 3, 4, 14, 19, 30)
+date3 = datetime(2130, 3, 4, 13, 15, 25)
+date4 = datetime(2130, 3, 4, 12, 20, 0)
+date5 = datetime(2130, 3, 3, 13, 10, 0)
+date6 = datetime(2130, 3, 5, 18, 20, 0)
+```
+
+**Template associé :**
+
+```jinja
+{{ date1|naturaltime }} renvoie "maintenant"<br />
+{{ date2|naturaltime }} renvoie "il y a 29 secondes"<br />
+{{ date3|naturaltime }} renvoie "il y a une heure"<br />
+{{ date4|naturaltime }} renvoie "il y a une heure"<br />
+{{ date5|naturaltime }} renvoie "il y a 1 jour, 1 heure"<br />
+{{ date6|naturaltime }} renvoie "dans 1 jour, 4 heures"<br />
+```
+
+### ordinal
+
+Convertit un entier en chaîne de caractères représentant une place dans un classement.
+
+Exemple, encore une fois en français :
+
+```jinja
+{{ 1|ordinal }}   renvoie 1<sup>er</sup><br />
+{{ "2"|ordinal }} renvoie 2<sup>e</sup><br />
+{{ 98|ordinal }}  renvoie 98<sup>e</sup><br />
+```
+
+Le filtre prend à la fois des entiers et des chaînes de caractères en paramètre.
+
+Nous avons fini le tour du module `humanize` ! Celui-ci contient au total six filtres vous facilitant le travail pour certaines opérations esthétiques dans vos templates.
+
+En résumé
+---------
+
+ - Django est un framework très puissant, il propose de nombreux modules complémentaires et optionnels pour simplifier le développement.
+ - Ce cours a traité de quelques-uns de ces modules, mais il est impossible de les présenter tous : la documentation présente de façon complète chacun d'entre eux.
+ - Il existe des centaines de modules non officiels permettant de compléter votre installation et d'intégrer de nouvelles fonctionnalités.
+ - Nous avons présenté ici `humanize`, qui rend vos données plus naturelles dans vos templates, et `flatpages` qui permet de gérer vos pages statiques via l'administration.
