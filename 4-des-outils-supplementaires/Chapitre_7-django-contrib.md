@@ -56,7 +56,7 @@ Dynamisons nos pages statiques avec flatpages !
 
 Sur la quasi-totalité des sites web, il existe des pages statiques dont le contenu doit parfois être modifié. Nous pouvons citer comme exemples les pages avec des informations de contact, de conditions générales d'utilisation, des foires aux questions, etc. Il peut être lourd de passer par des `TemplateView` pour ce genre de cas simple, puisque cela implique de devoir retourner dans le code ou le template à chaque modification du contenu.
 
-Django propose le module `flatpage` pour contourner ce problème. Une `flatpage` est un objet caractérisé par une URL, un titre et un contenu. Tout cela sera inclus dans un template générique, ou bien dans un template que vous aurez adapté. Ces informations sont enregistrées dans la base de données et sont éditables à tout moment par l'administration.
+Django propose le module `flatpages` pour contourner ce problème. Une `flatpage` est un objet caractérisé par une URL, un titre et un contenu. Tout cela sera inclus dans un template générique, ou bien dans un template que vous aurez adapté. Ces informations sont enregistrées dans la base de données et sont éditables à tout moment par l'administration.
 
 ### Installation du module
 
@@ -72,14 +72,14 @@ Pour la suite, deux méthodes s'offrent à vous : vous pouvez soit spécifier cl
 
 #### Le cas des URL explicites
 
-Pour cette méthode, deux possibilités sont envisageables. Vous devrez placer le code suivant dans le fichier `urls.py` principal du projet.
+Pour cette méthode, deux possibilités sont envisageables. Vous devrez placer l'un des codes suivants dans le fichier `urls.py` principal du projet.
 
 Vous pouvez soit préciser un chemin précis vers les `flatpages` : dans cet exemple, toutes les URL de nos pages statiques commenceront par `/pages/`. 
 
 ```python
 urlpatterns = patterns('',
-       ('^pages/', include('django.contrib.flatpages.urls')),
-    )
+   ('^pages/', include('django.contrib.flatpages.urls')),
+)
 ```
 
 … ou créez un pattern qui attrape toutes les URL qui n'ont pas de vues associées et tentez de trouver une `flatpage` qui corresponde (ce qui est équivalent au middleware). Dans ce cas, le pattern doit être ajouté en toute fin du fichier `urls.py` !
@@ -87,8 +87,8 @@ urlpatterns = patterns('',
 
 ```python
 urlpatterns += patterns('django.contrib.flatpages.views',
-       (r'^(?P<url>.*)$', 'flatpage'),
-    )
+    (r'^(?P<url>.*)$', 'flatpage'),
+)
 ```
 
 #### Utilisation du middleware FlatpageFallbackMiddleware
@@ -100,6 +100,8 @@ Lors de l'utilisation du middleware, le comportement des autres middlewares peut
 Enfin, vérifiez que vos middlewares laissent bien l'erreur 404 arriver jusqu'au middleware de `flatpage`. Si un autre middleware traite l'erreur et renvoie une exception, la réponse HTTP obtient le code 500 et notre nouveau middleware ne tentera même pas de chercher si une page existe.
 
 L'installation du middleware semble plus simple au premier abord, mais nécessite de faire attention à de nombreux petits pièges. Si vous souhaitez l'utiliser, vous pouvez le faire en ajoutant `'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware'` à votre `MIDDLEWARE_CLASSES`.
+
+Cela peut sembler trop "magique" pour certains et préfèrent la méthode explicité via le `urls.py`.
 
 [[information]]
 | Quelle que soit la méthode choisie, la suite de ce cours ne change pas.
@@ -116,7 +118,7 @@ Pour la suite, nous avons créé une page de contact, avec comme URL `/contact/`
 
 Il nous reste un seul point à traiter avant de pouvoir utiliser nos `flatpages` : _les templates_. Pour le moment, nous n'avons assigné aucun template à ces pages. Par défaut, chaque page sera traitée avec le template `flatpages/default.html` de votre projet. Nous allons donc tout d'abord le créer, dans le dossier `templates/` global :
 
-```html
+```jinja
 <!DOCTYPE html>
 <html>
 <head>
@@ -129,7 +131,7 @@ Il nous reste un seul point à traiter avant de pouvoir utiliser nos `flatpages`
 </html>
 ```
 
-Celui-ci peut bien entendu étendre de votre template `base.html`. Une fois ce template enregistré, nous pouvons tester le module : vous pouvez à présent accéder à la page (voir figure suivante).
+Celui-ci peut bien entendu étendre votre template `base.html`, comme vu au chapitre sur les templates. Une fois ce template enregistré, nous pouvons tester le module : vous pouvez à présent accéder à la page (voir figure suivante).
 
 ![Exemple de page de contact utilisant « Flatpages »](images/contrib-flatpages-exemple.png)
 
@@ -137,7 +139,6 @@ Comme vous pouvez le voir, le champ `contenu` accepte également du HTML, pour m
 
 Enfin, plusieurs options avancées, que nous ne détaillerons pas ici, existent afin :
 
-- D'autoriser les commentaires sur une page (via le module `django.contrib.comments`) ;
 - De n'autoriser que les utilisateurs connectés à voir la page (via le module `django.contrib.auth`) ;
 - D'utiliser un template différent de `flatpages/default.html`.
 
@@ -198,10 +199,10 @@ Ajoute des séparateurs de milliers, afin de simplifier la lecture. En réalité
 Exemples (encore une fois en français puisque le séparateur est l'espace) :
 
 ```jinja
-{{ 300|intcomma }}     renvoie 300     <br />
-{{ "9000"|intcomma }}  renvoie 9 000   <br />
-{{ 90000|intcomma }}   renvoie 90 000  <br />
-{{ 9000000|intcomma }} renvoie 9 000 000 <br />
+{{ 300|intcomma }}     renvoie 300       <br />
+{{ "9000"|intcomma }}  renvoie 9 000     <br />
+{{ 90000|intcomma }}   renvoie 90 000    <br />
+{{ 9000000|intcomma }} renvoie 9 000 000
 ```
 
 Le filtre prend à la fois des entiers et des chaînes de caractères en paramètre.
@@ -212,18 +213,18 @@ Le filtre prend à la fois des entiers et des chaînes de caractères en paramè
 Ce filtre permet de convertir les grands entiers en leur représentation textuelle, de préférence avec des nombres supérieurs à un million. Ce filtre respecte également la localisation pour le séparateur décimal.
 
 ```jinja
-{# Quelques cas classiques #}
-{{ 1000000|intword }}    renvoie 1,0 million. <br />
-{{ "4525640"|intword }}  renvoie 4,5 millions. <br />
-{{ 20000000|intword }}   renvoie 20,0 millions. <br />
+{{ 1000000|intword }}    renvoie 1,0 million.     <br />
+{{ "4525640"|intword }}  renvoie 4,5 millions.    <br />
+{{ 20000000|intword }}   renvoie 20,0 millions.   <br />
 {{ 999999999|intword }}  renvoie 1000,0 millions. <br />
-{{ 5500000000|intword }} renvoie 5,5 milliards. <br />
+{{ 5500000000|intword }} renvoie 5,5 milliards.   <br />
 
-{% comment %}Et des cas plus extrêmes. On suppose que mon_salaire = 9 * (10 ** 101), 
-ce qui correspond à un 9 suivi de 101 zéros ! {% endcomment %}
+{% comment %}
+Et des cas plus extrêmes. On suppose que mon_salaire = 9 * (10 ** 101), 
+ce qui correspond à un 9 suivi de 101 zéros !
+{% endcomment %}
 {{ 1000000000000000000|intword }} renvoie 1,0 quintillion. <br />
-{{ mon_salaire|intword }} renvoie 90,0 gogols.<br />
-
+{{ mon_salaire|intword }} renvoie 90,0 gogols.             <br />
 
 {# Ce filtre ne supporte pas les « petits nombres » #}
 {{ 90000|intword }} renvoie 90000.
@@ -246,7 +247,6 @@ date_hier = datetime(2130, 3, 3)
 date_auj = datetime(2130, 3, 4)
 date_demain = datetime(2130, 3, 5)
 ```
-
 
 **Template associé :**
 
@@ -278,12 +278,12 @@ date6 = datetime(2130, 3, 5, 18, 20, 0)
 **Template associé :**
 
 ```jinja
-{{ date1|naturaltime }} renvoie "maintenant"<br />
-{{ date2|naturaltime }} renvoie "il y a 29 secondes"<br />
-{{ date3|naturaltime }} renvoie "il y a une heure"<br />
-{{ date4|naturaltime }} renvoie "il y a une heure"<br />
+{{ date1|naturaltime }} renvoie "maintenant"            <br />
+{{ date2|naturaltime }} renvoie "il y a 29 secondes"    <br />
+{{ date3|naturaltime }} renvoie "il y a une heure"      <br />
+{{ date4|naturaltime }} renvoie "il y a une heure"      <br />
 {{ date5|naturaltime }} renvoie "il y a 1 jour, 1 heure"<br />
-{{ date6|naturaltime }} renvoie "dans 1 jour, 4 heures"<br />
+{{ date6|naturaltime }} renvoie "dans 1 jour, 4 heures" <br />
 ```
 
 ### ordinal
