@@ -10,7 +10,7 @@ Les commandes de base
 
 ### Prérequis
 
-La plupart des commandes acceptent des arguments. Leur utilisation est propre à chaque commande et est indiquée dans le titre de celle-ci. Un argument entre chevrons `< … >` indique qu'il est obligatiore, tandis qu'un argument entre crochets `[ … ]` indique qu'il est optionnel. Référez-vous ensuite à l'explication de la commande pour déterminer comment ces arguments sont utilisés. 
+La plupart des commandes acceptent des arguments. Leur utilisation est propre à chaque commande et est indiquée dans le titre de celle-ci. Un argument entre crochets `[…]` indique qu'il est optionnel. Référez-vous ensuite à l'explication de la commande pour déterminer comment ces arguments sont utilisés. 
 
 Certaines commandes possèdent également des options pour modifier leur fonctionnement. Celles-ci commencent généralement toutes par deux tirets « `--` » et s'ajoutent avant ou après les arguments de la commande, s'il y en a. Les options de chaque commande seront présentées après l'explication du fonctionnement global de la commande.
 
@@ -44,6 +44,7 @@ python manage.py runserver [2001:0db8:1234:5678::9]:7000
 ```
 
 **`--ipv6, -6`**
+
 Il est également possible de remplacer l'adresse locale IPv4 127.0.0.1 par l'adresse locale IPv6::1 en spécifiant l'option `--ipv6 ou -6` :
 
 ```console
@@ -51,9 +52,11 @@ python manage.py runserver -6
 ```
 
 **`--noreload`**
+
 Empêche le serveur de développement de redémarrer à chaque modification du code. Il faudra procéder à un redémarrage manuel pour que les changements soient pris en compte.
 
 **`--nothreading`**
+
 Le serveur utilise par défaut des threads. En utilisant cette option, ceux-ci ne seront pas utilisés.
 
 
@@ -92,6 +95,7 @@ django-admin.py startproject crepes_bretonnes /home/crepes/projets/crepes
 Ici, tous les fichiers seront directement insérés dans le dossier `/home/crepes/projets/crepes`.
 
 **`--template`**
+
 Cette option permet d'indiquer un modèle de projet à copier, plutôt que d'utiliser celui par défaut. Il est possible de spécifier un chemin vers le dossier contenant les fichiers ou une archive (.tar.gz, .tar.bz2, .tgz, .tbz, .zip) contenant également le modèle. Exemple :
 
 ```console
@@ -117,6 +121,7 @@ python manage.py startapp blog /home/crepes/projets/crepes/global/blog
 ```
 
 **`--template`**
+
 Tout comme `startproject`, cette option permet d'indiquer un modèle d'application à copier, plutôt que d'utiliser celui par défaut. Il est possible de spécifier un chemin vers le dossier contenant les fichiers ou une archive (.tar.gz, .tar.bz2, .tgz, .tbz, .zip) contenant le modèle. Exemple :
 
 ```console
@@ -135,7 +140,7 @@ Django se chargera de télécharger l'archive, de l'extraire, et de la copier da
 #### diffsettings
 
 Indique les variables de votre `settings.py` qui ne correspondent pas à la configuration par défaut d'un projet neuf. Les variables se terminant par `###` sont des variables qui n'apparaissent pas dans la configuration par défaut, comme `SITE_ID` ou `ROOT_URLCONF`.
-L'option `--all` permet de montrer toutes les variables même celle qui ont la valeur par défaut. Dans ce cas, elles sont *préfixées* par `###`
+L'option `--all` permet de montrer toutes les variables même celle qui ont la valeur par défaut. Dans ce cas, elles sont *préfixées* par `###`.
 
 #### check
 
@@ -154,21 +159,20 @@ Lance les tests unitaires d'un projet, d'une application, d'un test ou d'une mé
 python manage.py test blog
 ```
 
-Pour ne lancer qu'une seule suite de tests unitaire, il suffit d'ajouter le chemin Python du test après le nom de l'application :
+Pour ne lancer qu'une seule suite de tests unitaire, il suffit d'utiliser le chemin Python du test :
 
 ```console
 python manage.py test blog.tests.BlogUnitTest
 ```
 
-
 Finalement, pour ne lancer qu'une seule méthode d'un test unitaire, il faut également la spécifier après l'identifiant du test :
-
 
 ```console
 python manage.py test blog.tests.BlogUnitTest.test_lecture_article
 ```
 
 **`--failfast`**
+
 Arrête le processus de vérification de tous les tests dès qu'un seul test a échoué et rapporte l'échec en question.
 
 #### testserver <fixture fixture …>
@@ -184,6 +188,7 @@ Cette commande effectue trois actions :
 Cette commande peut se révéler particulièrement utile lorsque vous devez régulièrement changer de données pour tester la vue que vous venez d'écrire. Au lieu de devoir à chaque fois créer et supprimer des données manuellement dans votre base pour vérifier chaque situation possible, il vous suffira de lancer le serveur de développement avec des fixtures adaptées à chaque situation.
 
 **`--addrport [port ou adresse:port]`**
+
 Tout comme pour `runserver`, le serveur de développement sera accessible par défaut depuis 127.0.0.1:8000. Il est également possible de spécifier un port d'écoute ou une adresse spécifique :
 
 ```console
@@ -353,12 +358,13 @@ Voici un extrait d'un `inspectdb`, reprenant le modèle `Article` de notre appli
 
 ```python
 class BlogArticle(models.Model):
-    id = models.IntegerField(primary_key=True)
+    id = models.IntegerField(primary_key=True)   # AutoField?
     titre = models.CharField(max_length=100)
     auteur = models.CharField(max_length=42)
-    contenu = models.TextField()
+    contenu = models.TextField(blank=True)
     date = models.DateTimeField()
-    categorie = models.ForeignKey(BlogCategorie)
+    categorie = models.ForeignKey('BlogCategorie')
+    
     class Meta:
         managed = False
         db_table = 'blog_article'
@@ -379,7 +385,7 @@ De nombreuses commandes permettent d'afficher les requêtes SQL correspondant à
 - `sqlall` : requêtes de créations de tables et d'ajout des données initiales ;
 - `sqlclear` : requêtes de suppression des tables ;
 - `sqldropindexes` : requêtes de suppression des index SQL ;
-- `sqlflush` ensemble des requêtes exécutées par la commande `flush` ;
+- `sqlflush` : ensemble des requêtes exécutées par la commande `flush` ;
 - `sqlindexes` : requêtes de création des index SQL ;
 - `sqlmigrate` : requêtes d'une migration précise. En plus du nom de l'application, il faut fournir un nom de migration en paramètre ;
 - `sqlsequencereset` : requête pour réinitialiser les index de séquences de certains SGBD. (les séquences permettent de déterminer l'index numérique à assigner à la prochaine entrée créée) ;
@@ -401,7 +407,7 @@ Les commandes d'applications
 
 #### clearsessions
 
-Supprime les sessions expirées de `django.contrib.sessions`. Cette commande peut être utilisé dans une tâche cron pour nettoyer régulièrement cette table.
+Supprime les sessions expirées de `django.contrib.sessions`. Cette commande peut être utilisée dans une tâche cron pour nettoyer régulièrement cette table.
 
 
 #### changepassword [pseudo]
@@ -441,7 +447,7 @@ python manage.py makemessages --extension=html,txt
 … ne prendra que les fichiers HTML et TXT.
 
 **`--locale`**, **`-l`**
-Permet de ne mettre à jour une ou plusieurs langues :
+Permet de ne mettre à jour qu'une ou plusieurs langues :
 
 ```console
 python manage.py makemessages --locale fr_FR
