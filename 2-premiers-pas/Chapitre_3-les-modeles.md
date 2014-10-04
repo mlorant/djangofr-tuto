@@ -376,7 +376,7 @@ Nous avons vu comment utiliser les modèles dans la console, et d'une manière p
 
 Pour afficher les articles de notre blog, il suffit de reprendre une de nos requêtes précédentes, et l'incorporer dans une vue. Dans notre template, nous ajouterons un lien vers notre article pour pouvoir le lire en entier. Le problème qui se pose ici, et que nous n'avons pas soulevé avant, est le choix d'un identifiant. En effet, comment passer dans l'URL une information facile à transcrire pour désigner un article particulier ?
 
-En réalité, nos modèles contiennent plus d'attributs et de champs SQL que nous en déclarons. Nous pouvons le remarquer depuis la commande python manage.py sql blog, qui renvoie la structure SQL des tables créées :
+En réalité, nos modèles contiennent plus d'attributs et de champs SQL que nous en déclarons. Nous pouvons le remarquer depuis la commande `python manage.py sqlmigrate blog 0001_initial`, qui renvoie la structure SQL des tables créées :
 
     BEGIN;
     CREATE TABLE "blog_categorie" (
@@ -395,7 +395,7 @@ En réalité, nos modèles contiennent plus d'attributs et de champs SQL que nou
     ;
     COMMIT;
 
-Note : nous n'avons sélectionné ici que les modèles `Categorie` et `Article`.
+Note : nous n'avons sélectionné ici que les modèles `Categorie` et `Article`. Le `0001_initial` correspond à la première migration créée pour cette application.
 
 Chaque table contient les attributs définis dans le modèle, mais également un champ id qui est un nombre auto-incrémenté (le premier article aura l'ID 1, le deuxième l'ID 2, etc.), et donc unique ! C'est ce champ qui sera utilisé pour désigner un article particulier. Passons à quelque chose de plus concret, voici un exemple d'application :
 
