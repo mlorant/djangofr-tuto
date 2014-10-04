@@ -135,7 +135,7 @@ Dans un premier temps, nous allons voir comment améliorer la liste. En effet, p
 
 ![Notre liste d'articles, avec uniquement le titre comme colonne !](images/admin-liste-articles.png "Notre liste d'articles, avec uniquement le titre comme colonne")
 
-Le tableau ne contient qu'une colonne contenant le titre de notre article. Cette colonne n'est pas due au hasard : c'est en réalité le résultat de la méthode `__unicode__` que nous avons définie dans notre modèle.
+Le tableau ne contient qu'une colonne contenant le titre de notre article. Cette colonne n'est pas due au hasard : c'est en réalité le résultat de la méthode `__str__` que nous avons définie dans notre modèle.
 
     class Article(models.Model):
         titre = models.CharField(max_length=100)
@@ -145,7 +145,7 @@ Le tableau ne contient qu'une colonne contenant le titre de notre article. Cette
         date = models.DateTimeField(auto_now_add=True, auto_now=False, verbose_name="Date de parution")
         categorie = models.ForeignKey(Categorie)
     
-        def __unicode__(self):
+        def __str__(self):
             return self.titre
 
 Ce résultat par défaut est assez utile, mais nous aimerions pouvoir gérer plus facilement nos articles : les trier selon certains champs, filtrer par catégorie, etc. Pour ce faire, nous devons créer une nouvelle classe dans notre fichier `admin.py`, contenant actuellement ceci :

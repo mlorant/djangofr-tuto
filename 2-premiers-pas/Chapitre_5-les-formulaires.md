@@ -179,7 +179,8 @@ Dans le chapitre sur les modèles, nous avons créé une classe `Article`. Pour 
         contenu = models.TextField(null=True)
         date = models.DateTimeField(auto_now_add=True, auto_now=False, verbose_name="Date de parution")
         categorie = models.ForeignKey(Categorie)
-        def __unicode__(self):
+
+        def __str__(self):
             return self.titre
 
 Pour faire un formulaire à partir de ce modèle, c'est très simple :
