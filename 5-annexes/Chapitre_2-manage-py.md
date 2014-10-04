@@ -43,20 +43,17 @@ Le serveur de développement prend également en charge l'IPv6. Nous pouvons dè
 python manage.py runserver [2001:0db8:1234:5678::9]:7000
 ```
 
-**`--ipv6, -6`**
-
+**`--ipv6, -6`**  
 Il est également possible de remplacer l'adresse locale IPv4 127.0.0.1 par l'adresse locale IPv6::1 en spécifiant l'option `--ipv6 ou -6` :
 
 ```console
 python manage.py runserver -6
 ```
 
-**`--noreload`**
-
+**`--noreload`**  
 Empêche le serveur de développement de redémarrer à chaque modification du code. Il faudra procéder à un redémarrage manuel pour que les changements soient pris en compte.
 
-**`--nothreading`**
-
+**`--nothreading`**  
 Le serveur utilise par défaut des threads. En utilisant cette option, ceux-ci ne seront pas utilisés.
 
 
@@ -94,8 +91,7 @@ django-admin.py startproject crepes_bretonnes /home/crepes/projets/crepes
 
 Ici, tous les fichiers seront directement insérés dans le dossier `/home/crepes/projets/crepes`.
 
-**`--template`**
-
+**`--template`**  
 Cette option permet d'indiquer un modèle de projet à copier, plutôt que d'utiliser celui par défaut. Il est possible de spécifier un chemin vers le dossier contenant les fichiers ou une archive (.tar.gz, .tar.bz2, .tgz, .tbz, .zip) contenant également le modèle. Exemple :
 
 ```console
@@ -120,8 +116,7 @@ Si vous le souhaitez, vous pouvez indiquer un répertoire spécifique pour accue
 python manage.py startapp blog /home/crepes/projets/crepes/global/blog
 ```
 
-**`--template`**
-
+**`--template`**  
 Tout comme `startproject`, cette option permet d'indiquer un modèle d'application à copier, plutôt que d'utiliser celui par défaut. Il est possible de spécifier un chemin vers le dossier contenant les fichiers ou une archive (.tar.gz, .tar.bz2, .tgz, .tbz, .zip) contenant le modèle. Exemple :
 
 ```console
@@ -171,8 +166,7 @@ Finalement, pour ne lancer qu'une seule méthode d'un test unitaire, il faut ég
 python manage.py test blog.tests.BlogUnitTest.test_lecture_article
 ```
 
-**`--failfast`**
-
+**`--failfast`**  
 Arrête le processus de vérification de tous les tests dès qu'un seul test a échoué et rapporte l'échec en question.
 
 #### testserver <fixture fixture …>
@@ -187,8 +181,7 @@ Cette commande effectue trois actions :
 
 Cette commande peut se révéler particulièrement utile lorsque vous devez régulièrement changer de données pour tester la vue que vous venez d'écrire. Au lieu de devoir à chaque fois créer et supprimer des données manuellement dans votre base pour vérifier chaque situation possible, il vous suffira de lancer le serveur de développement avec des fixtures adaptées à chaque situation.
 
-**`--addrport [port ou adresse:port]`**
-
+**`--addrport [port ou adresse:port]`**  
 Tout comme pour `runserver`, le serveur de développement sera accessible par défaut depuis 127.0.0.1:8000. Il est également possible de spécifier un port d'écoute ou une adresse spécifique :
 
 ```console
@@ -215,16 +208,13 @@ Crée un ensemble de fichiers Python qui décrivent les changements de la base d
 
 Il est possible de spécifier qu'une ou plusieurs applications à analyser.
 
-**`--empty`**
-
+**`--empty`**  
 Cette option permet de créer une migration "vide", afin d'écrire soi même le contenu. Cette option est utile pour les utilisateurs avancées, familiers avec le système de migrations de Django.
 
-**`--dry-run`**
-
+**`--dry-run`**  
 Permet de visualiser les changements dans vos modèles, sans enregistrer le fichier de migration correspondant. En combinant cette option avec `--verbosity 3`, vous pouvez voir le fichier qui serait créé.
 
-**`--merge`**
-
+**`--merge`**  
 Permet de résoudre les conflits de mises à jour.
 
 #### migrate [app\_name [migration\_name]]
@@ -235,14 +225,12 @@ Synchronise votre base de données avec l'état actuel de vos modèles (ajout de
  - `migrate app_name` : Applique toutes les modifications pour l'application concerné et éventuellement ses dépendances en cas de clés étrangères ;
  - `migrate app_name migration_name` : Permet de retourner à l'état de la migration donné en paramètre. La valeur `zero` pour ce paramètre permet de défaire toutes les migrations déjà faites. 
 
-**`--fake`**
-
+**`--fake`**  
 Marque la migration comme appliquée (ou "non appliquée", si vous retournez en arrière), sans pour autant appliquer les changements SQL. 
 
 Ceci est réservé aux utilisateurs avancés qui veulent appliquer manuellement les changements. Sachez ce que vous faites : la base peut devenir instable si vous utilisez cette option précaution.
 
-**`--list, -l`**
-
+**`--list, -l`**  
 Liste les applications installées et marque les migrations appliquées ou non, avec une croix. Les applications sans modèles seront également affichées mais avec la ligne `(no migrations)`.
 
 #### dbshell
@@ -273,29 +261,29 @@ python manage.py dumpdata blog.Article blog.Categorie auth
 
 Ici, les modèles `Article` et `Categorie` de l'application `blog` et tous les modèles de l'application `django.contrib.auth` seront sélectionnés et leurs données affichées. Si vous ne spécifiez aucune application ou modèle, tous les modèles du projet seront repris.
 
-**`--all`**
+**`--all`**  
 Force l'affichage de tous les modèles, à utiliser si certains modèles sont filtrés.
 
-**`--format <fmt>`**
+**`--format <fmt>`**  
 Change le format utilisé. Utilisez `--format xml` pour utiliser le format XML par exemple.
 
-**`--indent <nombre d'espace>`**
+**`--indent <nombre d'espace>`**  
 Par défaut, comme vu plus tôt, toutes les données sont affichées sur une seule et même ligne. Cela ne facilite pas la lecture pour un humain, vous pouvez donc utiliser cette option pour indenter le rendu avec le nombre d'espaces spécifié pour chaque indentation.
 
-**`--exclude`**
+**`--exclude`**  
 Empêche certains modèles ou applications d'être affichés. Par exemple, si vous souhaitez afficher toutes les données de l'application `blog`, sauf celles du modèle `blog.Article`, vous pouvez procéder ainsi :
 
 ```console
 python manage.py dumpdata blog --exclude blog.Article
 ```
 
-**`--natural-foreign`**
+**`--natural-foreign`**  
 Utilise une représentation différente pour les relations `ForeignKey` et `ManyToMany` pour d'éventuelles situations à problèmes. Si vous affichez `contrib.auth.Permission` ou utilisez des `ContentType` dans vos modèles, vous devriez utiliser cette option.
    
-**`--natural-primary`**
+**`--natural-primary`**  
 Ne précisera pas les clés primaires (l'ID auto-incrémenté) puisqu'il pourra être déterminé à la désérialisation. 
 
-**`--pks`**
+**`--pks`**  
 Permet de définir la liste des clés primaires à afficher, séparées par des virgules. Cette option n'est disponible uniquement pour l'affichage de modèles précis :
 
 ```console
@@ -343,8 +331,7 @@ Dans ce cas, le fichier devra obligatoirement s'appeler `ma_fixture.xml` pour ê
 
 Django peut également gérer des fixtures compressées. Si vous indiquez `ma_fixture.json` comme fixture à utiliser, Django cherchera `ma_fixture.json`, `ma_fixture.json.zip`, `ma_fixture.json.gz` ou `ma_fixture.json.bz2`. S'il tombe sur une fixture compressée, il la décompressera, puis lancera le processus de copie.
 
-**`--app`**
-
+**`--app`**  
 Vous pouvez limiter la recherche de fixtures à une application précise via `--app`. 
 
 #### inspectdb
@@ -424,7 +411,7 @@ Si aucun nom d'utilisateur n'est spécifié, Django prendra le nom d'utilisateur
 
 Permet de créer un super-utilisateur (un utilisateur avec tous les pouvoirs). Cette commande demandera le pseudo, l'adresse e-mail — si ceux-ci n'ont pas été spécifiés à partir des options — et le mot de passe. 
 
-**`--username` et `--email`**
+**`--username` et `--email`**  
 Permettent de spécifier directement le nom et l'adresse e-mail de l'utilisateur.
 
 Si ces deux options sont indiquées, vous devrez spécifier le mot de passe manuellement par la suite afin que l'utilisateur puisse se connecter.
@@ -434,10 +421,10 @@ Si ces deux options sont indiquées, vous devrez spécifier le mot de passe manu
 
 Parcourt tous les fichiers de l'arborescence à partir du dossier actuel pour déterminer les chaînes de caractères à traduire et crée ou met à jour les fichiers de traduction. Référez-vous au chapitre sur l'internationalisation pour plus d'informations.
 
-**`--all, -a`**
+**`--all, -a`**  
 Met à jour les chaînes à traduire pour tous les langages.
 
-**`--extensions`**
+**`--extensions`**  
 Indique de ne sélectionner que les fichiers qui ont une extension spécifique :
 
 ```console
@@ -446,7 +433,7 @@ python manage.py makemessages --extension=html,txt
 
 … ne prendra que les fichiers HTML et TXT.
 
-**`--locale`**, **`-l`**
+**`--locale`**, **`-l`**  
 Permet de ne mettre à jour qu'une ou plusieurs langues :
 
 ```console
@@ -454,10 +441,10 @@ python manage.py makemessages --locale fr_FR
 python manage.py makemessages -l fr_FR -l da-dk
 ```
 
-**`--symlinks`**
+**`--symlinks`**  
 Autorise Django à suivre les liens symboliques en explorant les fichiers.
 
-**`--ignore, -i`**
+**`--ignore, -i`**  
 Permet d'ignorer certains fichiers :
 
 ```console
@@ -466,10 +453,10 @@ python manage.py makemessages --ignore=blog/* --ignore=*.html
 
 Tous les fichiers HTML et du dossier `blog` seront ignorés.
 
-**`--no-wrap`**
+**`--no-wrap`**  
 Empêche Django de répartir les longues chaînes de caractères en plusieurs lignes dans les fichiers de traduction.
 
-**`--no-location`**
+**`--no-location`**  
 Empêche Django d'indiquer la source de la chaîne de caractères dans les fichiers de traduction (nom du fichier et ligne dans celui-ci).
 
 
@@ -477,7 +464,7 @@ Empêche Django d'indiquer la source de la chaîne de caractères dans les fichi
 
 Compile les fichiers de traduction `.po` vers des fichiers `.mo` afin que gettext puisse les utiliser. Référez-vous au chapitre sur l'internationalisation pour plus d'informations.
 
-**`--locale`**
+**`--locale`**  
 Permet de ne compiler qu'une seule langue :
 
 ```console
