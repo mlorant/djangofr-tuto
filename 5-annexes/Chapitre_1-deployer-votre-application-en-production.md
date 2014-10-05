@@ -1,5 +1,3 @@
-# .CONF sur UBUNTU!!!!
-
 Déployer votre application en production
 ========================================
 
