@@ -71,8 +71,8 @@ Nous pouvons construire plusieurs objets Q de la manière suivante :
 
 et les incorporer dans une requête ainsi (avec une clause « OU ») :
 
-    import operator
-    Eleve.objects.filter(reduce(operator.or_, objets_q))
+    >>> import operator
+    >>> Eleve.objects.filter(reduce(operator.or_, objets_q))
     [<Eleve: Élève Mathieu (18/20 de moyenne)>, <Eleve: Élève Thibault (15/20 de moyenne)>]
 
 `reduce` est une fonction par défaut de Python qui permet d'appliquer une fonction à plusieurs valeurs successivement. Petit exemple pour comprendre plus facilement :
