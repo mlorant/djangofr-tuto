@@ -21,15 +21,15 @@ Avant de nous lancer dans la configuration du serveur web, Nous allons  modifier
 
 Voici les variables à modifier :
 
--  Passer la variable `DEBUG` à `False` pour indiquer que le site est désormais en production. Il est très important de le faire, sans quoi les erreurs et des données sensibles pourraient être affichées !
-- Remplir la variable `ALLOWED_HOSTS` qui doit contenir les différentes adresses depuis lesquelles le site peut être accédé. Exemple : `ALLOWED_HOSTS = ['www.crepes-bretonnes.com', '.super-crepes.fr']`. Le point au début du deuxième élément de la liste permet d'indiquer que tous les sous-domaines sont acceptés, autrement dit, les domaines suivants seront accessibles : `super-crepes.fr`, `www.super-crepes.fr`, `mobile.super-crepes.fr`, etc.
+-  Passez la variable `DEBUG` à `False` pour indiquer que le site est désormais en production. Il est très important de le faire, sans quoi les erreurs et des données sensibles pourraient être affichées !
+- Remplissez la variable `ALLOWED_HOSTS` qui doit contenir les différentes adresses depuis lesquelles le site peut être accédé. Exemple : `ALLOWED_HOSTS = ['www.crepes-bretonnes.com', '.super-crepes.fr']`. Le point au début du deuxième élément de la liste permet d'indiquer que tous les sous-domaines sont acceptés, autrement dit, les domaines suivants seront accessibles : `super-crepes.fr`, `www.super-crepes.fr`, `mobile.super-crepes.fr`, etc.
 - Adaptez la connexion à la base de données en fonction de ce que vous souhaitez utiliser en production. Nous vous conseillons d'utiliser *PostgreSQL* en production, MySQL le cas échéant. N'oubliez pas d'installer les extensions nécessaires si vous souhaitez utiliser autre chose que SQLite.
-- Générez une nouvelle `SECRET_KEY`, via [http://www.miniwebtool.com/django-secret-key-generator/]() par exemple. Cette clé sert à sécuriser plusieurs éléments de Django, il est important qu'elle soit unique et secrète.
+- Générez une nouvelle `SECRET_KEY`, via [cet outil en ligne](http://www.miniwebtool.com/django-secret-key-generator/) par exemple. Cette clé sert à sécuriser plusieurs éléments de Django, il est important qu'elle soit unique et secrète.
 
 
 ### Installation avec Apache2
 
-Par défaut, Django fournit un fichier `wsgi.py` qui s'occupera de cette liaison. Pour rappel :
+Par défaut, Django fournit un fichier `wsgi.py` qui s'occupera de la liaison entre votre projet Django et Apache2. Pour rappel :
 
     crepes_bretonnes/
         manage.py
@@ -67,16 +67,16 @@ Ensuite, modifions le fichier `/etc/apache2/httpd.conf` pour indiquer où trouve
  - La deuxième ligne, `WSGIPythonPath`, permet de rendre accessible votre projet via la commande `import` en Python. Ainsi, le module `wsgi` pourra lancer notre projet Django.
  - Enfin, la directive `<Directory ...>` permet de s'assurer que le serveur Apache peut accéder au fichier `wsgi.py` uniquement.
 
-Sauvegardez ce fichier. Pour un réglage plus fin du nom de domaine ou du port, il faudra passer par les VirtualHosts d'Apache, de la manière façon.
+Sauvegardez ce fichier. Si vous souhaitez changer des informations sur le nom de domaine ou le port, il faudra passer par les VirtualHosts d'Apache (ce que nous ne couvrirons pas ici).
 
 Sauvegardez et relancez Apache (`service apache2 reload`). Votre site doit normalement être accessible !
 
 
-### Installation avec nginx
+### Installation avec nginx et gunicorn
 
 Aujourd'hui, nginx est de plus en plus utilisé comme serveur web avec les frameworks web récent notamment grâce à sa légèreté et sa facilité de configuration.
 
-Il va falloir fonctionner en deux temps : il faut d'abord lancer un serveur, semblable à celui de développement, qui va exécuter votre projet Django, puis le lier à votre serveur nginx. Nous allons ici choisir gunicorn, puisque que le trio nginx + gunicorn + Django est fréquemment vu sur le web.
+Il va falloir fonctionner en deux temps : il faut d'abord lancer un serveur, semblable à celui de développement, qui va exécuter votre projet Django, qui fera office de serveur HTTP WSGI, puis le lier à votre serveur nginx. Nous allons ici choisir gunicorn, puisque que le trio nginx + gunicorn + Django est fréquemment vu sur le web.
 
 Si vous souhaitez utiliser un environnement virtuel, pensez à l'activer dans un premier temps. Ensuite, pour installer gunicorn, il suffit d'utiliser `pip` :
 
@@ -157,6 +157,8 @@ Une application n'est *jamais parfaite*, et des erreurs peuvent tout le temps fa
 
 Cet e-mail contient plusieurs types d'informations : le traceback complet de l'erreur Python, les données HTTP de la requête et d'autres variables bien pratiques (informations sur la requête HTTP, état de la couche WSGI, etc.). Ces dernières ne sont pas affichées dans l'image (elles viennent après, dans l'e-mail).
 
+![Exemple de mail reçu en cas d'erreur](images/mail-exception.png "Exemple de mail reçu en cas d'erreur")
+
 ### Activer l'envoi d'e-mails
 
 Dans un premier temps, assurez-vous qu'un serveur d'e-mails est installé sur votre machine, permettant d'envoyer des e-mails via le protocole SMTP.
@@ -171,7 +173,7 @@ Ensuite, nous allons ajouter une variable `ADMINS` dans le `settings.py`. Cette 
 
 Ici, les e-mails d'erreurs sont envoyés aux deux personnes, en même temps.
 
-<div class="info">Par défaut, Django envoie les e-mails depuis l'adresse `root@localhost`. Cependant, certaines boîtes e-mail rejettent cette adresse, ou tout simplement vous souhaiteriez avoir quelque chose de plus propre. Dans ce cas, vous pouvez personnaliser l'adresse en ajoutant une variable dans votre `settings.py` : `SERVER_EMAIL = 'noreply@crepes-bretonnes.com'`, par exemple.</div>
+<div class="info">Par défaut, Django envoie les e-mails depuis l'adresse `root@localhost`. Cependant, certaines boîtes e-mail rejettent cette adresse, ou tout simplement vous souhaiteriez avoir quelque chose de plus propre. Dans ce cas, vous pouvez personnaliser l'adresse en ajoutant une variable dans votre `settings.py` : `SERVER_EMAIL = 'no-reply@crepes-bretonnes.com'`, par exemple.</div>
 
 ### Quelques options utiles...
 
@@ -224,7 +226,7 @@ Enfin, il peut arriver qu'une erreur de votre code survienne lors de la saisie d
 
 **Ne laissez surtout pas ces informations visibles**, même si vous êtes le seul à avoir ces e-mails et que vous vous sentez confiant. L'accès au mot de passe en clair est très mal vu pour le bien des utilisateurs et personne n'est jamais à l'abri d'une fuite (vol de compte e-mail, écoute de paquets…).
 
-### Introduction à Sentry, pour garder un oeil attentif
+### Introduction à Sentry, pour garder un oeil encore plus attentif
 
 Une fois tout ceci appliqué, vous recevrez un mail par erreur 500 et vous vous estimez prêt à conquérir le web avec votre tout nouveau site. Cependant, méfiez-vous, cette pratique peut très vite vous spammer de mails, notamment lors d'une mise en production sur un site à fort affluence.
 
@@ -258,3 +260,12 @@ Voici la liste des hébergeurs notables :
 
 
 Une liste plus exhaustive est disponible sur [djangofriendly.com](http://djangofriendly.com/hosts/), qui se charge de lister les hébergeurs en mettant en avant leurs 2 ou 3 points clés. Comme vous pouvez le voir, la majorité de ces hébergeurs sont payants cependant.
+
+En résumé
+---------
+
+- Il ne faut pas utiliser le serveur `python manage.py runserver` en production ;
+- Une des méthodes d'installation possible passe par Apache2 avec le mod_wsgi, en exécutant le script wsgi.py contenu dans le répertoire du projet ;
+- Il existe également le combo nginx + gunicorn, que l'on a également décrit ;
+- Si l'on désactive le mode `DEBUG`, Django enverra un e-mail à toutes les personnes listées dans le tuple `ADMINS` en cas d'erreur 500 sur le site. Il est possible d'être averti en cas d'erreurs 404, et de filtrer les données sensibles envoyées (telles que les mots de passe) ;
+- Sentry est un projet Django permettant de surveiller votre propre projet de manière plus fine. 
